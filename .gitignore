@@ -1,0 +1,3 @@
+# theme.css ist hier die Quelle, kein Build-Artefakt -> wird committet.
+# BRAT liest sie direkt vom Default-Branch.
+.DS_Store

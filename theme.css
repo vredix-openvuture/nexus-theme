@@ -1,0 +1,1371 @@
+/* ============================================================================
+ *  NEXUS  —  a card-based PKM theme for Obsidian
+ *  v0.2.0  ·  mirobo-Sprache + wallust-Farben
+ * ----------------------------------------------------------------------------
+ *  Vorbild: der "mirobo"-Style aus velumeron (quickshell) — flat, jedes
+ *  UI-Element ist ein eigener, abgerundeter, leicht getönter Chip, der auf
+ *  dem "Schreibtisch" (Wallpaper-Farbe) schwebt.
+ *
+ *  In Obsidian bekommt damit JEDES Element seine eigene Card:
+ *    Editor-Tableiste · Editor · Explorer-Icons · Explorer · Vault-Wähler
+ *
+ *  FARBEN kommen aus wallust:
+ *    Das Snippet  wallust-colors.css  liefert --wl-background/-foreground/
+ *    -color0..15 (live von wallust überschrieben). Dieses Theme leitet daraus
+ *    seine --nx-* Tokens ab. Fallbacks = aktuelle Live-Palette, damit es auch
+ *    ohne Snippet funktioniert.
+ *
+ *  Semantik (identisch zu velumeron Colors.qml):
+ *    color0 → bgPrimary   color1 → bgElement   color2 → bgSecondary
+ *    color3 → ACCENT      color5 → border      color7/fg → text
+ *    color8 → muted       color15 → bright
+ *
+ *  Aufbau:
+ *    1. GEOMETRIE  (mirobo-Tokens: Radius, Gap)
+ *    2. FARBEN     (wallust → --nx-*)  · Dark
+ *    3. FARBEN     · Light
+ *    4. OBSIDIAN-CORE-VARIABLEN
+ *    5. DESK / LAYOUT
+ *    6. CHIPS      (jedes Element eine Card)
+ *    7. EXPLORER   (Feinschliff)
+ *    8. TYPOGRAFIE / CONTENT
+ * ========================================================================== */
+
+
+/* ============================================================================
+ * 1. GEOMETRIE  —  mirobo-Tokens (hier drehst du am schnellsten)
+ * ========================================================================== */
+.theme-dark,
+.theme-light {
+  --nx-radius:    15px;   /* EINHEITLICHER Radius für ALLE Chips (cozy: weicher) */
+  --nx-r-tile:    10px;   /* nur für Mini-Elemente (Tabs, Datei-Einträge)    */
+  --nx-gap:       12px;   /* EINHEITLICHER Abstand zwischen allen Chips      */
+  --nx-bar-h:     38px;   /* feste, gleiche Höhe für Tableiste & Icon-Leiste */
+  --nx-tab-gap:   5px;    /* gleicher Abstand der Tabs nach oben & zu den Seiten */
+
+  /* Obsidian-Radien angleichen */
+  --radius-s: var(--nx-r-tile);
+  --radius-m: var(--nx-radius);
+  --radius-l: var(--nx-radius);
+
+  --tab-outline-width: 0;
+  --divider-width: 0px;
+  --divider-width-hover: 3px;
+  --tab-divider-color: transparent;   /* keine Linie zwischen Tabs */
+
+  /* Tabs: rundum abgerundete Pillen (keine harte Browser-Tab-Unterkante) */
+  --tab-radius: var(--nx-r-tile);
+  --tab-radius-active: var(--nx-r-tile);
+  --tab-curve: 0px;
+}
+
+
+/* ============================================================================
+ * 2. FARBEN  —  wallust → --nx-*   ·  DARK
+ * ========================================================================== */
+.theme-dark {
+  /* ── Akzent = EXAKT wie velumeron (Colors.qml: bgActive = color3). Das ist
+        der Slot, den deine Bar/rofi für aktiv/selektiert nutzen → Obsidian
+        matcht die Bar. Bei diesem Wallpaper ist color3 blau; ändert sich mit
+        dem Wallpaper. Nicht willkürlich tauschen. ── */
+  --nx-accent:     var(--wl-color3, #4E68AB);   /* roh: für Tönung/Border/Desk/aktiv
+     (COZY: unten per @supports oklch entsättigt → pastellig statt neon) */
+
+  /* ── KONTRAST-SCHUTZ ── Prinzip für garantierte Lesbarkeit bei JEDER Palette:
+     1. Flächen bleiben NAH an color0 und werden nur leicht angehoben — COZY: mit
+        einem warmen CREME (--nx-warm) statt reinem Weiß → warmes Dunkel, kein
+        kühles Grau, aber weiterhin NEUTRAL (nicht mit dem Akzent geflutet).
+     2. Text = warmes Off-White (fixe Tönung, hoher Kontrast → lesbar).
+     3. Akzent-als-Text (Überschriften/Links) wird HELLER gezogen (--nx-accent-fg).
+     --nx-guard = wie stark die Flächen angehoben werden. */
+  /* PALETTE-TREU (wie velumeron): KEIN Warm-Braun mehr einmischen. Flächen
+     folgen color0. Nur ein NEUTRALER Lift (Weiß) hebt die Karten leicht an. */
+  --nx-guard:      11%;   /* Karten deutlicher vom Schreibtisch abheben (war 7% → wirkte verwaschen) */
+  --nx-warm:       #f8ead2;   /* nur noch als sanfter Lift-Ton (kaum genutzt) */
+  --nx-warm-dark:  #2a1d14;   /* Legacy-Var (für styles.css-Fallbacks), nicht mehr in Flächen */
+  --nx-ember:      #e0a465;   /* Legacy-Var */
+  /* Karten = color0 + neutraler Lift (≈ velumeron bgElement/color1) */
+  --nx-floor:      color-mix(in srgb, #ffffff var(--nx-guard), var(--wl-color0, #080409));
+
+  /* Schreibtisch = color0 (= velumeron bgPrimary), nur ein Hauch Akzent. */
+  --nx-desk:       color-mix(in srgb, var(--nx-accent) 5%, var(--wl-color0, #080409));
+  /* Cards = warmer Floor + nur ein HAUCH Akzent (kein Farbfeld) */
+  --nx-chip:       color-mix(in srgb, var(--nx-accent) 4%,  var(--nx-floor)); /* Editor          */
+  --nx-chip-side:  color-mix(in srgb, var(--nx-accent) 8%,  var(--nx-floor)); /* Leisten/Sidebar */
+  --nx-elevated:   color-mix(in srgb, var(--nx-accent) 13%, var(--nx-floor)); /* Menüs/Inputs    */
+
+  /* Linien & Text — mehr Definition (die dezenten Ränder ließen alles verwaschen). */
+  /* Border = color5-Tönung ÜBER einem neutralen Weiß-Hauch. Der Weiß-Anteil gibt
+     die Helligkeit, die die Kante auf JEDER Palette sichtbar macht — ein reines
+     color5 (z.B. Rosa bei Indigo&Rose) hat auf dunklen Karten zu wenig Kontrast
+     und wirkte randlos. color5 bleibt als Farbton drin. */
+  --nx-border:     color-mix(in srgb, var(--wl-color5, #C95E61) 30%, color-mix(in srgb, #ffffff 16%, transparent));
+  /* TEXT = warmes Off-White, hoher Kontrast auf color0. */
+  --nx-fg:         color-mix(in srgb, var(--wl-foreground, #A7E2A6) 38%, #ffffff);
+  /* Sekundärtext: aus dem echten Fließtext abgedimmt (nicht mehr aus dem grauen
+     color8) → klar lesbar statt hazy. */
+  --nx-fg-muted:   color-mix(in srgb, var(--nx-fg) 64%, var(--wl-color0, #0B0402));
+  --nx-fg-bright:  var(--wl-color15, #C4E1C3);
+  /* Akzent als Textfarbe (Links/aktiv) = Akzent Richtung Fließtext gemischt
+     (statt reinem Weiß) → gedämpfter, fügt sich besser ein. */
+  --nx-accent-fg:  color-mix(in srgb, var(--nx-accent) 66%, var(--nx-fg));
+  --nx-on-accent:  var(--nx-fg-bright);
+
+  /* FLAT: keine Schatten — Trennung über Ton & dezente Ränder */
+  --nx-chip-shadow: none;
+
+  color-scheme: dark;
+}
+
+/* Akzent = roher Palette-Slot color3 (NICHT entsättigt) → echtes Palette-Lila
+   wie in der velumeron-Bar/Referenz-App. color3 ist von Haus aus gedämpft, also
+   nie neon; ein Hauch Chroma-Boost gibt ihm etwas mehr Leben. */
+@supports (color: oklch(from white l c h)) {
+  .theme-dark {
+    --nx-accent: oklch(from var(--wl-color3, #443A67) l calc(c * 1.35) h);
+  }
+}
+
+
+/* ============================================================================
+ * 3. FARBEN  —  ·  LIGHT   (gespiegeltes „Verfahren" zum Dark-Mode)
+ *    wallust läuft dark → im Light-Mode NICHT color0 hochziehen (würde muddy),
+ *    sondern eine PAPIER-Basis nehmen und neutral ABDUNKELN. Akzent bleibt aus
+ *    wallust (matcht Bar/rofi). Gleiche Token-Struktur wie Dark, damit die
+ *    Kern-Variablen (Abschnitt 4) unverändert daraus ableiten.
+ * ========================================================================== */
+.theme-light {
+  /* Akzent = EXAKT wie Dark (wallust color3). Roh für Border/Tönung. */
+  --nx-accent:     var(--wl-color3, #4E68AB);
+
+  /* ── FLÄCHEN-AKZENT ──
+     wallust liefert oft entsättigte Slots. Früher stark aufgesättigt (×1.9) →
+     das wirkte knallig/futuristisch. COZY: nur mild anheben (unten ×1.2) →
+     pastellig. Default = roher Akzent, falls oklch fehlt. */
+  --nx-accent-vivid: var(--nx-accent);
+
+  /* ── KONTRAST-SCHUTZ (Spiegel zu Dark) ──
+     Dark hebt color0 mit warmem Creme an; Light senkt warmes PAPIER mit einem
+     warmen Dunkel ab (nicht reinem Schwarz → nie kühl/grau). */
+  --nx-guard:      5%;
+  --nx-paper:      #f4ede1;                                                          /* warmes Creme-Papier */
+  --nx-floor:      color-mix(in srgb, #2a2018 var(--nx-guard), var(--nx-paper));     /* warm abgesenkt */
+
+  /* ── FARB-STÄRKE der Light-Flächen ── COZY: deutlich zurückgenommen. */
+  --nx-desk:       color-mix(in srgb, var(--nx-accent-vivid) 26%,
+                     color-mix(in srgb, #2a2018 6%, var(--nx-paper)));   /* Fläche hinter den Cards: sanft */
+  --nx-chip:       color-mix(in srgb, var(--nx-accent-vivid) 11%, var(--nx-paper));   /* Editor          */
+  --nx-chip-side:  color-mix(in srgb, var(--nx-accent-vivid) 22%, var(--nx-floor));   /* Leisten/Sidebar */
+  --nx-elevated:   color-mix(in srgb, var(--nx-accent-vivid) 8%,  var(--nx-paper));   /* Menüs/Inputs    */
+
+  /* Linien & Text — warm, Ränder dezent. */
+  --nx-border:     color-mix(in srgb, var(--nx-accent-vivid) 30%, #d8cebd);
+  --nx-fg:         #3a332c;   /* warmes Dunkelbraun-Grau */
+  --nx-fg-muted:   #857c70;
+  --nx-fg-bright:  #241d16;
+  --nx-accent-fg:  color-mix(in srgb, var(--nx-accent-vivid) 62%, #201a12);
+  --nx-on-accent:  #faf5ec;
+
+  /* FLAT: keine Schatten */
+  --nx-chip-shadow: none;
+
+  color-scheme: light;
+}
+
+/* COZY-FILTER (Light): Akzent nur MILD anheben (×1.2) → pastellig statt knallig.
+   Nur wenn oklch-Relativfarben unterstützt werden; sonst roher Akzent. */
+@supports (color: oklch(from white l c h)) {
+  .theme-light {
+    --nx-accent-vivid: oklch(from var(--nx-accent) calc(l * 0.96 + 0.02) calc(c * 1.2) h);
+  }
+}
+
+
+/* ============================================================================
+ * 4. OBSIDIAN-CORE-VARIABLEN  —  aus --nx-* ableiten
+ * ========================================================================== */
+.theme-dark,
+.theme-light {
+  /* Akzent als TEXT (Überschriften/Links/Fett – auch via deine Snippets) nutzt
+     die hellere, lesbare Variante. Für farbige FLÄCHEN (Desk/Tönung/aktiv/Border)
+     greift das Theme direkt auf das rohe var(--nx-accent) zu. */
+  /* Highlight-Wash für ==Text== — aus dem Paletten-Akzent abgeleitet, damit die
+     Marker-Farbe mit dem Wallpaper/Wallust mitwandert (roh var(--nx-accent), nicht
+     die hellere Text-Variante, weil es eine FLÄCHE ist). Der Marker-Strich selbst
+     (schräge Enden, kein Chip) bleibt in Abschnitt 8 definiert. */
+  --nx-mark: color-mix(in srgb, var(--nx-accent) 38%, transparent);
+
+  --interactive-accent:      var(--nx-accent-fg);
+  --interactive-accent-hover: color-mix(in srgb, var(--nx-accent-fg) 82%, white);
+  --text-accent:             var(--nx-accent-fg);
+  --text-accent-hover:       color-mix(in srgb, var(--nx-accent-fg) 82%, white);
+
+  --background-primary:        var(--nx-chip);
+  --background-primary-alt:     color-mix(in srgb, var(--nx-chip) 92%, black);
+  --background-secondary:      var(--nx-chip-side);
+  --background-secondary-alt:   var(--nx-elevated);
+  --background-modifier-border: var(--nx-border);
+  --background-modifier-border-hover:
+      color-mix(in srgb, var(--nx-accent) 45%, var(--nx-border));
+  --background-modifier-hover:  color-mix(in srgb, var(--nx-accent) 12%, transparent);
+
+  --text-normal:  var(--nx-fg);
+  --text-muted:   var(--nx-fg-muted);
+  --text-faint:   color-mix(in srgb, var(--nx-fg-muted) 60%, transparent);
+  --text-on-accent: var(--nx-on-accent);
+
+  --scrollbar-thumb-bg:        color-mix(in srgb, var(--nx-fg-muted) 25%, transparent);
+  --scrollbar-active-thumb-bg: var(--nx-accent);
+
+  /* Tags: heller, lesbarer Text auf dezenter Akzent-Pille */
+  --tag-color:            var(--nx-fg-bright);
+  --tag-color-hover:      var(--nx-fg-bright);
+  --tag-background:       color-mix(in srgb, var(--nx-accent) 24%, transparent);
+  --tag-background-hover: color-mix(in srgb, var(--nx-accent) 38%, transparent);
+  --tag-border-color:     color-mix(in srgb, var(--nx-accent) 35%, transparent);
+  --tag-border-width:     1px;
+}
+
+
+/* ============================================================================
+ * 5. DESK / LAYOUT  —  der Schreibtisch hinter den Chips
+ * ========================================================================== */
+
+.workspace,
+.workspace-split,
+.horizontal-main-container,
+.titlebar,
+.status-bar,
+body {
+  background-color: var(--nx-desk) !important;
+}
+.titlebar,
+.status-bar { border: none !important; }
+
+/* Splitter unsichtbar – die Gaps trennen */
+.workspace-leaf-resize-handle,
+.workspace-split > hr { background: transparent !important; }
+
+/* Gleichmäßige Außenabstände: Container liefert die halbe Lücke,
+   jeder Chip die andere Hälfte (siehe Abschnitt 6). */
+.horizontal-main-container {
+  padding: calc(var(--nx-gap) / 2);
+}
+
+
+/* ============================================================================
+ * 6. CARDS  —  jede Spalte EINE Card; die Leiste ist Teil ihrer Card (mirobo)
+ * ----------------------------------------------------------------------------
+ *  Card = .workspace-tabs (enthält Leiste + Inhalt). Die Leiste
+ *  (.workspace-tab-header-container) sitzt als oberer Streifen IN der Card,
+ *  nur durch eine Trennlinie abgesetzt — kein eigener Chip.
+ *
+ *   Editor  :  Card = .mod-root .workspace-tabs        (Tableiste + Editor)
+ *   Sidebar :  Card = .mod-*-split .workspace-tabs      (Icon-Leiste + Explorer)
+ *   Vault   :  eigene Card = .workspace-sidedock-vault-profile
+ * ========================================================================== */
+
+/* 6a. Tiefere Wrapper + .workspace-tabs neutralisieren. Die Card entsteht aus
+       Leiste + Inhalt, die zu EINER Card verbunden werden (6b).
+       WICHTIG: Cards liegen auf tab-header-container/tab-container, weil DEREN
+       Ränder zuverlässig greifen — die Ränder von .workspace-tabs tun das NICHT
+       (absolut positioniert → Editor/Explorer klebten aneinander). */
+.workspace-split,
+.mod-root,
+.mod-left-split,
+.mod-right-split,
+.workspace-tabs,
+.workspace-leaf,
+.workspace-leaf-content,
+.view-content,
+.markdown-source-view,
+.markdown-reading-view,
+.cm-editor,
+.cm-gutters,
+.nav-files-container {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* 6b. CARD = Leiste + Inhalt, optisch zu EINER Card verbunden: gleiche Farbe &
+       Rand, dazwischen KEIN Spalt (Leiste unten flach, Inhalt oben flach),
+       nur eine Trennlinie. */
+.workspace-tab-header-container,
+.workspace-tab-container {
+  border: 1px solid var(--nx-border) !important;
+  background-color: var(--nx-chip) !important;          /* Editor: dezent   */
+}
+.mod-left-split .workspace-tab-header-container,
+.mod-left-split .workspace-tab-container,
+.mod-right-split .workspace-tab-header-container,
+.mod-right-split .workspace-tab-container {
+  background-color: var(--nx-chip-side) !important;     /* Sidebar kräftiger */
+}
+
+/* Leiste = obere Hälfte der Card (oben rund, unten flach + Trennlinie) */
+.workspace-tab-header-container {
+  height: var(--nx-bar-h) !important;
+  min-height: var(--nx-bar-h) !important;
+  margin: calc(var(--nx-gap) / 2) calc(var(--nx-gap) / 2) 0 !important;
+  padding: var(--nx-tab-gap) !important;   /* rundum gleicher Innenabstand */
+  display: flex !important;
+  align-items: center !important;
+  border-radius: var(--nx-radius) var(--nx-radius) 0 0 !important;
+  border-bottom: none !important;   /* keine Trennlinie – nahtlos zur Card */
+}
+
+/* Inhalt = untere Hälfte der Card (oben flach & randlos, unten rund) */
+.workspace-tab-container {
+  margin: 0 calc(var(--nx-gap) / 2) calc(var(--nx-gap) / 2) !important;
+  border-top: none !important;
+  border-radius: 0 0 var(--nx-radius) var(--nx-radius) !important;
+  overflow: hidden !important;
+}
+.workspace-tab-header-container-inner {
+  align-items: center;
+  gap: var(--nx-tab-gap);            /* gleicher Abstand zwischen den Tabs */
+  background: transparent !important;
+}
+
+/* Tabs = runde Pillen mit SOLIDEM Hintergrund (nicht transparent → kein
+   Durchscheinen des Banners), gleichmäßig eingerückt. */
+.workspace-tab-header {
+  border-radius: var(--nx-r-tile) !important;
+  margin: 0 !important;
+  height: calc(var(--nx-bar-h) - 2 * var(--nx-tab-gap)) !important;
+  background-color: var(--nx-chip-side) !important;   /* solide */
+}
+.workspace-tab-header::before,
+.workspace-tab-header::after { display: none !important; }
+/* Keine Trennlinie zwischen den Tabs (Rand/Schatten/Divider-Variable killen) */
+.workspace-tab-header,
+.workspace-tab-header-inner {
+  border: none !important;
+  box-shadow: none !important;
+}
+.workspace-tab-header.is-active {
+  background-color: color-mix(in srgb, var(--nx-accent) 30%, var(--nx-chip)) !important;
+  border-radius: var(--nx-r-tile) !important;
+}
+.workspace-tab-header.is-active .workspace-tab-header-inner-title {
+  color: var(--nx-fg-bright);
+}
+
+/* Ribbon (linke Icon-Leiste): normale Card wie die anderen Chips. */
+.workspace-ribbon.mod-left,
+.side-dock-ribbon.mod-left {
+  background-color: var(--nx-chip-side) !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: var(--nx-radius) !important;
+  margin: calc(var(--nx-gap) / 2) !important;
+  padding: 6px 0 !important;
+  box-shadow: var(--nx-chip-shadow) !important;
+}
+/* Kein „Blindfleck" oben: das leere ::before-Pseudo (44×40) + der Collapse-
+   Button-Bereich raus, Icons starten direkt oben. */
+.workspace-ribbon.mod-left::before,
+.side-dock-ribbon.mod-left::before {
+  display: none !important;
+  content: none !important;
+}
+.workspace-ribbon.mod-left .workspace-ribbon-collapse-btn,
+.workspace-ribbon.mod-left .sidebar-toggle-button {
+  display: none !important;
+}
+.workspace-ribbon.mod-left .side-dock-actions,
+.workspace-ribbon.mod-left .side-dock-ribbon-actions {
+  margin-top: 0 !important;
+  padding: 0 !important;                 /* kein Leerraum links/rechts */
+  align-items: center !important;        /* Icons mittig, symmetrisch */
+}
+.workspace-ribbon.mod-left .side-dock-actions .clickable-icon,
+.workspace-ribbon.mod-left .side-dock-ribbon-action {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* (Ribbon-Sichtbarkeit hover/hidden liegt jetzt in der Plugin-styles.css, damit
+   Body-Klasse UND Regel aus EINEM Plugin-Reload kommen.) */
+
+/* Vault-Wähler: eigene Card unter der Sidebar-Card (im Sidebar-Flow) */
+.workspace-sidedock-vault-profile {
+  position: relative !important;
+  box-sizing: border-box !important;
+  width: auto !important;
+  margin: calc(var(--nx-gap) / 2) !important;
+  padding: 6px 10px !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: var(--nx-radius) !important;
+  box-shadow: var(--nx-chip-shadow) !important;
+  background-color: var(--nx-chip-side) !important;
+  overflow: hidden !important;
+}
+
+/* View-Header nicht doppelt rahmen */
+.view-header {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Popover / Menüs / Prompts im selben Chip-Look */
+.menu,
+.suggestion-container,
+.prompt,
+.popover.hover-popover {
+  border-radius: var(--nx-radius) !important;
+  border: 1px solid var(--nx-border);
+  box-shadow: var(--nx-chip-shadow);
+  background-color: var(--nx-elevated);
+}
+
+/* Inline-Tags — KONTRAST-SCHUTZ: immer dunkle Akzent-Pille + heller Text,
+   egal wie hell die wallust-Palette ist. Höhere Spezifität als das
+   style.css-Snippet (.cm-hashtag → --interactive-accent), damit es greift. */
+.markdown-source-view.mod-cm6 .cm-hashtag,
+.markdown-rendered a.tag {
+  background-color: color-mix(in srgb, var(--nx-accent) 22%, var(--nx-chip)) !important;
+  color: var(--nx-fg-bright) !important;
+}
+.markdown-source-view.mod-cm6 .cm-hashtag:hover,
+.markdown-rendered a.tag:hover {
+  background-color: color-mix(in srgb, var(--nx-accent) 34%, var(--nx-chip)) !important;
+}
+
+
+/* ============================================================================
+ * 7. EXPLORER  —  Feinschliff Datei-Baum  (früher: explorer.css)
+ * ========================================================================== */
+
+.nav-files-container {
+  padding: 6px 4px;
+  margin-top: 20px !important;   /* Abstand unter der Icon-/Kopfleiste */
+}
+
+.nav-file-title,
+.nav-folder-title {
+  border-radius: var(--nx-r-tile);
+  margin-inline: 4px;
+}
+.nav-file-title.is-active {
+  background-color: color-mix(in srgb, var(--nx-accent) 18%, transparent) !important;
+  color: var(--nx-fg-bright) !important;
+}
+.tree-item-self:hover {
+  background-color: var(--background-modifier-hover) !important;
+}
+
+/* Top-Level-Ordner: luftiger, gesperrte Schrift als Abschnitts-Titel */
+.nav-files-container .tree-item:not(.tree-item .tree-item)
+  > .nav-folder-title .nav-folder-title-content {
+  letter-spacing: 1px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Bestimmte Systemordner farblich hervorheben (Name + Kind-Elemente) */
+div[data-path*='attachments'],
+div[data-path*='attachments'] + div.nav-folder-children,
+div[data-path*='archive'],
+div[data-path*='archive'] + div.nav-folder-children,
+div[data-path*='scribbles'],
+div[data-path*='scribbles'] + div.nav-folder-children {
+  color: var(--interactive-accent);
+}
+
+/* Ordnername beim Hover akzentuieren */
+.nav-folder-title-content:hover {
+  color: var(--interactive-accent) !important;
+}
+
+/* ── Haupt-Ordner als getönte BLÖCKE, deren Ton einem vertikalen Theme-Verlauf
+   folgt (oben kräftig → unten dezent) ── (Body-Klasse vom Nexus-Suite-Plugin).
+   Die Farbe sitzt auf dem GANZEN Ordner-Block (.tree-item.nav-folder), also
+   inkl. .nav-folder-children → ausgeklappte Kinder liegen im selben Block wie
+   ihr Parent. Jeder Block bekommt seinen Ton nach Position (--i), sodass ein
+   Verlauf von oben nach unten entsteht (getrennte Blöcke wie im Referenzbild).
+   --i wird per :nth-child gesetzt; Spacer/Dateien überspringen Nummern, die
+   Reihenfolge bleibt monoton → wirkt immer wie ein Verlauf.
+   Regler: --nx-fld-intensity (Plugin-Slider) = Grundstärke des obersten Blocks. */
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) {
+  --i: 6;
+  /* Ember → Prussian: jeder Block bekommt einen Ember-Grundton nach Position
+     (--i, oben in der Liste am kräftigsten), PLUS einen vertikalen Verlauf, der
+     zum Fuß hin ins kühle Prussian (--wl-color5) kippt — und je weiter unten der
+     Ordner steht, desto mehr Prussian (Verlauf über die ganze Liste, warm→kühl). */
+  --fld-acc:  clamp(4%, calc(var(--nx-fld-intensity, 22%) + 36%), 82%);   /* einheitlich für ALLE Ordner (kein Positions-Sweep) */
+  --fld-tint: color-mix(in srgb, var(--wl-color5, #1b3854) var(--fld-acc), var(--nx-chip-side));   /* Prussian-Blau als Grundton */
+  margin: 4px 10px;
+  padding: 2px;
+  border: none;
+  border-radius: var(--nx-radius);
+  overflow: hidden;
+  background: var(--fld-tint);
+}
+
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(1)  { --i: 0;  }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(2)  { --i: 1;  }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(3)  { --i: 2;  }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(4)  { --i: 3;  }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(5)  { --i: 4;  }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(6)  { --i: 5;  }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(7)  { --i: 6;  }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(8)  { --i: 7;  }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(9)  { --i: 8;  }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(10) { --i: 9;  }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(11) { --i: 10; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(12) { --i: 11; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(13) { --i: 12; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(14) { --i: 13; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(15) { --i: 14; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(16) { --i: 15; }
+
+/* Parent-Titel: transparent (der Block trägt die Farbe), Kopf des Blocks.
+   Flexbox, damit der Klapp-Pfeil MIT in den Balken kommt (Obsidian setzt ihn
+   sonst links außerhalb des Paddings). */
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) > .tree-item-self.nav-folder-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px;
+  margin: 0;
+  min-height: 0 !important;   /* Obsidians erzwungene Höhe weg → Titel wrappt Inhalt */
+  height: auto !important;
+  padding: 3px 10px;
+  border-radius: var(--nx-r-tile);
+  font-weight: 600;
+  color: var(--nx-fg-bright);
+  background: transparent;
+  line-height: 1.4;
+}
+
+/* ALLE Kinder des Titels vertikal zentrieren (Icon UND Text), Versatz raus */
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item)
+  > .tree-item-self.nav-folder-title > * {
+  align-self: center !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Klapp-Pfeil in den Balken holen (statt links im Gutter) */
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item)
+  > .tree-item-self.nav-folder-title > .tree-item-icon.collapse-icon {
+  position: static !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  order: -1;                 /* immer ganz links im Balken */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 18px !important;
+  color: var(--nx-fg-bright);
+}
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item)
+  > .tree-item-self.nav-folder-title > .tree-item-icon.collapse-icon svg {
+  display: block;
+  margin: 0;
+}
+
+/* Ausgeklappte Kinder liegen im selben Block → transparent, damit die Block-
+   Tönung durchscheint; Text gut lesbar halten. */
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) .nav-folder-children {
+  background: transparent;
+}
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) .nav-folder-children .tree-item-self {
+  color: var(--nx-fg-bright);
+}
+
+/* Hover auf der Ordner-Titelzeile: sanfter, halbtransparenter Lift statt des
+   generischen grauen --background-modifier-hover-Kastens (Zeile ~456). Die
+   Block-Tönung scheint durch, ein zarter heller Innenrand hebt die Pill an, die
+   Schrift bleibt cremig hell (nicht das grelle Orange von Zeile ~478). */
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item)
+  > .tree-item-self.nav-folder-title:hover {
+  background: color-mix(in srgb, var(--nx-fg-bright) 11%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nx-fg-bright) 15%, transparent);
+  color: var(--nx-fg-bright) !important;
+}
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item)
+  > .tree-item-self.nav-folder-title:hover .nav-folder-title-content {
+  color: var(--nx-fg-bright) !important;
+}
+
+
+/* ============================================================================
+ * 8. TYPOGRAFIE / CONTENT
+ * ========================================================================== */
+
+.markdown-source-view.mod-cm6 .cm-content,
+.markdown-preview-view {
+  --line-height-normal: 1.7;
+}
+
+/* ── Überschriften-STAFFELUNG (Reading View) ──────────────────────────────
+   Kein Balken/keine Linie: die Hierarchie entsteht rein aus FARBE + GEWICHT.
+   H1/H2 voll im Akzent, H3 zieht Richtung Text, H4 fällt auf helles Fließ-
+   text-Weiß ab, H5/H6 werden zu ruhigen, gesperrten Labels. Alle Werte aus
+   dem Paletten-System (--nx-*), also palettentreu bei jedem Wallpaper. */
+.markdown-rendered {
+  --h1-color: var(--nx-accent-fg);
+  --h2-color: var(--nx-accent-fg);
+  --h3-color: color-mix(in srgb, var(--nx-accent-fg) 78%, var(--nx-fg));
+  --h4-color: var(--nx-fg-bright);
+  --h5-color: var(--nx-fg-muted);
+  --h6-color: color-mix(in srgb, var(--nx-fg-muted) 80%, transparent);
+
+  --h1-weight: 800;
+  --h2-weight: 700;
+  --h3-weight: 700;
+  --h4-weight: 600;
+  --h5-weight: 600;
+  --h6-weight: 600;
+}
+/* H5/H6 als gesperrte Labels — das trennt sie klar von H4/Fließtext, obwohl
+   sie kaum größer sind. H6 zusätzlich in Versalien (Serif-„Kicker"). */
+.markdown-rendered h5 { letter-spacing: .03em; }
+.markdown-rendered h6 { letter-spacing: .08em; text-transform: uppercase; }
+
+/* ── Highlight (==Text==) als echter TEXTMARKER-Strich ──
+   Bewusst KEINE Pillen-Rundung/Padding-Box (sonst sieht es aus wie ein Tag-Chip).
+   Der Gradient bei 105° erzeugt flach-schräge Marker-Enden und liegt eng am Text
+   → liest sich wie ein Filzstift-Strich, nicht wie ein Chip. box-decoration-break
+   sorgt dafür, dass auch umbrechende Highlights durchgezogen aussehen.
+   Gilt Reading + Live-Preview. */
+.markdown-rendered mark,
+.cm-editor .cm-highlight {
+  background: linear-gradient(105deg,
+    transparent 0.4%,
+    var(--nx-mark) 1.8%,
+    var(--nx-mark) 98.2%,
+    transparent 99.6%);
+  color: inherit;
+  border-radius: 1px;
+  padding: .04em .1em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* ── Listen-Marker im Akzent (Reading + Live-Preview) ── */
+.markdown-rendered ul > li::marker { color: var(--nx-accent-fg); }
+.markdown-rendered ol > li::marker { color: var(--nx-accent-fg); font-weight: 600; }
+.cm-editor .cm-formatting-list     { color: var(--nx-accent-fg); }
+
+/* ── Horizontale Trenner als weicher Akzent-Verlauf statt harter Linie ── */
+.markdown-rendered hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right,
+    transparent,
+    color-mix(in srgb, var(--nx-accent) 55%, transparent),
+    transparent);
+}
+
+/* ── Fußnoten-Referenzen als kleine Akzent-Chips statt roher Superscript ── */
+.markdown-rendered sup.footnote-ref a,
+.markdown-rendered .footnote-ref a {
+  background: color-mix(in srgb, var(--nx-accent) 14%, transparent);
+  border-radius: var(--nx-r-tile);
+  padding: 0 .4em;
+  text-decoration: none;
+}
+
+/* Inline-Code & Codeblöcke */
+:not(pre) > code {
+  background-color: color-mix(in srgb, var(--nx-accent) 12%, var(--nx-chip-side));
+  border-radius: var(--nx-r-tile);
+  padding: .12em .4em;
+}
+.markdown-rendered pre,
+.cm-editor .HyperMD-codeblock-bg {
+  border-radius: var(--nx-radius);
+}
+
+/* Blockquotes: Akzent-Balken + zarter Tint, kursiv & gedämpft → sofort als
+   Zitat erkennbar, ohne laut zu sein. Tint/Padding nur im Reading View, damit
+   der Live-Preview-Editor (Zeilen-Layout) nicht springt. */
+.markdown-rendered blockquote,
+.cm-editor .cm-blockquote {
+  border-left: 3px solid var(--nx-accent);
+  border-radius: 0 var(--nx-radius) var(--nx-radius) 0;
+}
+.markdown-rendered blockquote {
+  background: color-mix(in srgb, var(--nx-accent) 6%, transparent);
+  padding: .5em .9em;
+  color: var(--nx-fg-muted);
+  font-style: italic;
+}
+
+/* Tabellen: sauber abgerundet, ohne dass die Ecken den Rahmen abschneiden.
+   Rahmen liegt auf der TABELLE, die Zellen tragen nur die inneren Linien. */
+.markdown-rendered table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius);
+  overflow: hidden;
+}
+.markdown-rendered th,
+.markdown-rendered td {
+  border: none;
+  border-bottom: 1px solid var(--nx-border);
+  border-right: 1px solid var(--nx-border);
+}
+.markdown-rendered th:last-child,
+.markdown-rendered td:last-child { border-right: none; }
+.markdown-rendered tr:last-child td { border-bottom: none; }
+.markdown-rendered thead th {
+  background-color: color-mix(in srgb, var(--nx-accent) 10%, var(--nx-chip-side));
+}
+
+/* Falls eine Tabelle breiter als der Editor ist: horizontal scrollen
+   statt abschneiden. */
+.markdown-rendered .table-wrapper,
+.markdown-source-view .table-wrapper {
+  overflow-x: auto;
+}
+
+
+/* ============================================================================
+ * 9. GLOBALE UI/EDITOR-DETAILS   (früher: style.css)
+ * ----------------------------------------------------------------------------
+ *  Chrome ausblenden, Überschriften/Fett/Einzugslinien/Zeilennummern in Akzent.
+ *  (Die Hashtag-FLÄCHE regelt Abschnitt 6 mit höherer Spezifität — hier nur die
+ *   Rand-Korrektur der Hashtag-Segmente.)
+ * ========================================================================== */
+
+/* 9a. Nicht benötigtes Chrome ausblenden */
+.sidebar-toggle-button.mod-left,
+.sidebar-toggle-button.mod-right,
+.workspace-tab-header-tab-list,
+.titlebar-button.mod-minimize,
+.titlebar-button.mod-maximize,
+.titlebar-button.mod-close {
+  display: none !important;
+}
+
+/* 9b. Hashtag-Segmente ohne Innentrennung (Fläche/Farbe kommt aus Abschnitt 6) */
+.cm-hashtag-begin { border-right: none !important; }
+.cm-hashtag-end   { border-left:  none !important; }
+
+/* 9c. Überschriften im Live-Preview — gleiche FARB-/GEWICHT-Staffelung wie im
+   Reading View (Abschnitt 8). Das aktive Snippet `style.css` färbt via
+   `.theme-* .cm-editor .cm-content .cm-header{,-1,-2,-3} !important` ALLE Header
+   auf eine Farbe; deshalb hier bewusst mit `body`-Präfix (höhere Spezifität als
+   die 4 Snippet-Klassen), damit die Staffelung gewinnt — OHNE das Snippet zu
+   editieren. Der Header-Block im Snippet ist dadurch redundant (siehe Notiz). */
+body.theme-dark  .cm-editor .cm-content .cm-header-1,
+body.theme-light .cm-editor .cm-content .cm-header-1 { color: var(--nx-accent-fg) !important; font-weight: 800; }
+body.theme-dark  .cm-editor .cm-content .cm-header-2,
+body.theme-light .cm-editor .cm-content .cm-header-2 { color: var(--nx-accent-fg) !important; font-weight: 700; }
+body.theme-dark  .cm-editor .cm-content .cm-header-3,
+body.theme-light .cm-editor .cm-content .cm-header-3 { color: color-mix(in srgb, var(--nx-accent-fg) 78%, var(--nx-fg)) !important; font-weight: 700; }
+body.theme-dark  .cm-editor .cm-content .cm-header-4,
+body.theme-light .cm-editor .cm-content .cm-header-4 { color: var(--nx-fg-bright) !important; font-weight: 600; }
+body.theme-dark  .cm-editor .cm-content .cm-header-5,
+body.theme-light .cm-editor .cm-content .cm-header-5 { color: var(--nx-fg-muted) !important; font-weight: 600; letter-spacing: .03em; }
+body.theme-dark  .cm-editor .cm-content .cm-header-6,
+body.theme-light .cm-editor .cm-content .cm-header-6 { color: color-mix(in srgb, var(--nx-fg-muted) 80%, transparent) !important; font-weight: 600; letter-spacing: .08em; }
+
+/* 9d. Fettschrift in Akzent */
+.cm-strong {
+  color: var(--interactive-accent) !important;
+  font-weight: bold !important;
+}
+
+/* 9e. Einzugs-Hilfslinien in Akzent */
+.cm-indent::before {
+  border-right-color: var(--interactive-accent) !important;
+}
+
+/* 9f. Zeilennummern: klein + Akzent */
+body .cm-editor .cm-lineNumbers .cm-gutterElement {
+  font-size: 8px !important;
+  color: var(--interactive-accent) !important;
+}
+
+
+/* ============================================================================
+ * 10. PROPERTIES  —  ruhiges Listen-Design (Notion-Stil)  (früher: properties.css)
+ * ========================================================================== */
+
+/* 10a. Container: rahmenlos, linksbündig */
+.metadata-container {
+  width: 100%;
+  margin: 1.6em 0 2.4em;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+}
+.metadata-properties-heading { display: none; }
+
+/* 10b. Zeilen: kompakt, ganze Zeile hoverbar */
+.metadata-property {
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: var(--radius-s, 6px);
+  min-height: 30px;
+  padding: 2px 6px;
+  margin: 0;
+  align-items: center;
+  transition: background-color 0.1s ease;
+}
+.metadata-property:hover {
+  background-color: var(--background-modifier-hover) !important;
+  border: none !important;
+}
+
+/* 10c. Keys: gedämpft, schmal, mit Icon */
+.metadata-property-key {
+  background-color: transparent !important;
+  border: none !important;
+  border-right: none !important;
+  border-radius: 0 !important;
+  flex: 0 0 160px;
+  width: 160px;
+  margin-right: 6px;
+  padding: 0 4px 0 2px;
+  color: var(--text-muted) !important;
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+.metadata-property-key:hover { background-color: transparent !important; }
+.metadata-property-key-input {
+  color: var(--text-muted) !important;
+  font-style: normal;
+  padding-right: 0 !important;
+}
+.metadata-property-icon {
+  transform: none;
+  margin-right: 6px;
+  opacity: 0.55;
+}
+.metadata-property:hover .metadata-property-icon { opacity: 0.8; }
+.metadata-property-value { padding-left: 2px; }
+
+/* 10d. Multi-Select Tags: dezente, neutral-graue Pills */
+.multi-select-pill {
+  background-color: color-mix(in srgb, var(--text-normal) 11%, transparent) !important;
+  color: var(--text-normal) !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 1px 8px !important;
+  font-size: 0.82em;
+  height: auto;
+}
+.multi-select-pill:hover {
+  background-color: color-mix(in srgb, var(--text-normal) 18%, transparent) !important;
+}
+.multi-select-pill-remove-button { color: var(--text-faint); }
+.multi-select-pill-remove-button:hover { color: var(--text-normal); }
+
+/* 10e. „Add property"-Button: sehr dezent, erscheint beim Hover */
+.metadata-add-button.text-icon-button {
+  color: var(--text-muted);
+  background-color: transparent;
+  opacity: 0.6;
+  margin-top: 4px;
+  padding: 2px 6px;
+  border: none !important;
+  border-radius: var(--radius-s, 6px);
+  font-size: 0.8em;
+  transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+/* Property-Liste gehovert → Button hebt sich sanft ab */
+.metadata-container:hover .metadata-add-button.text-icon-button {
+  opacity: 0.85;
+}
+/* Button direkt gehovert → voll sichtbar */
+.metadata-add-button.text-icon-button:hover {
+  opacity: 1 !important;
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+}
+
+/* Leerer Property-Block (data-property-count="0"): Obsidian versteckt den
+ * GESAMTEN Container (display:none); da wir das Heading (den Aufklapp-Punkt)
+ * verstecken, bliebe der „Add property"-Button unerreichbar. Darum Container
+ * + Inhalt hier erzwungen einblenden. */
+.metadata-container[data-property-count="0"] {
+  display: block !important;
+}
+.metadata-container[data-property-count="0"] .metadata-content {
+  display: block !important;
+}
+.metadata-container[data-property-count="0"] .metadata-add-button.text-icon-button {
+  display: inline-flex !important;
+}
+
+.is-mobile .metadata-container { width: 100%; }
+
+/* 10f. Side-Panel (Properties-View): gestapeltes, schmales Layout */
+.workspace-leaf-content[data-type="file-properties"] .metadata-container {
+  width: 100%;
+  margin: 0;
+  padding: 4px 6px;
+}
+.workspace-leaf-content[data-type="file-properties"] .metadata-property {
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 0;
+  padding: 5px 6px;
+  margin-bottom: 2px;
+}
+.workspace-leaf-content[data-type="file-properties"] .metadata-property-key {
+  width: 100% !important;
+  flex: 0 0 auto !important;
+  margin: 0 0 3px 0 !important;
+  font-size: 0.82em;
+}
+.workspace-leaf-content[data-type="file-properties"] .metadata-property-value {
+  width: 100%;
+  padding-left: 22px;
+}
+
+
+/* ============================================================================
+ * 11. CHECKLISTS  —  Aufgaben-Zustände  (früher: checklists.css)
+ *     (Die reinen Trennlinien-/Nesting-Regeln waren im Snippet auskommentiert
+ *      und bleiben es hier bewusst, um die Optik nicht zu verändern.)
+ * ========================================================================== */
+
+/* Basis: Checkboxen fürs Custom-Styling vorbereiten */
+.task-list-item-checkbox {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  cursor: pointer !important;
+  position: relative !important;
+}
+
+/* [x] erledigt */
+.task-list-item[data-task="x"] .task-list-item-checkbox {
+  background-color: var(--color-green) !important;
+  border-color: var(--color-green) !important;
+}
+.task-list-item[data-task="x"] {
+  color: var(--text-muted) !important;
+  text-decoration: line-through !important;
+}
+
+/* [!] Warnung */
+.task-list-item[data-task="!"] .task-list-item-checkbox {
+  background-color: var(--color-orange) !important;
+  border-color: var(--color-orange) !important;
+}
+.task-list-item[data-task="!"] .task-list-item-checkbox::after {
+  content: "!" !important;
+  position: absolute !important;
+  top: 50% !important; left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  color: white !important; font-weight: bold !important;
+  font-size: 0.85em !important; line-height: 1 !important;
+}
+
+/* [/] in Bearbeitung (halb ausgefüllt) */
+.task-list-item[data-task="/"] .task-list-item-checkbox {
+  background: linear-gradient(to right, var(--color-blue) 50%, transparent 50%) !important;
+  border-color: var(--color-blue) !important;
+}
+
+/* [-] abgebrochen / gestrichen */
+.task-list-item[data-task="-"] .task-list-item-checkbox {
+  background-color: var(--text-muted) !important;
+  border-color: var(--text-muted) !important;
+}
+.task-list-item[data-task="-"] {
+  color: var(--text-faint) !important;
+  text-decoration: line-through !important;
+}
+
+/* [?] Frage / unklar */
+.task-list-item[data-task="?"] .task-list-item-checkbox {
+  background-color: var(--color-purple) !important;
+  border-color: var(--color-purple) !important;
+}
+.task-list-item[data-task="?"] .task-list-item-checkbox::after {
+  content: "?" !important;
+  position: absolute !important;
+  top: 50% !important; left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  color: white !important; font-weight: bold !important;
+  font-size: 0.85em !important; line-height: 1 !important;
+}
+
+/* [>] weitergeleitet / delegiert */
+.task-list-item[data-task=">"] .task-list-item-checkbox {
+  background-color: var(--color-cyan) !important;
+  border-color: var(--color-cyan) !important;
+}
+
+
+/* ============================================================================
+ * 12. CALLOUTS  —  runde, akzentuierte Callouts  (früher: callouts.css)
+ * ========================================================================== */
+
+.callout {
+  /* --callout-color is ALREADY a complete, valid <color> — Obsidian's own
+     built-in callouts define it as e.g. var(--callout-success), and our plugin
+     now wraps its custom callout colors in rgb() once at the source (see
+     applyCallouts() in main.js). Do NOT wrap it again here with rgb() — that
+     nests a color inside rgb()'s channel arguments, which is invalid and gets
+     silently dropped (falls back to currentColor — that's why only the icon/
+     title, which Obsidian styles itself, was ever colored while the border
+     silently fell back to plain text color). */
+  /* --background-primary IS the editor background the callout sits on, so the
+     tint has to be strong enough to read against it on its own — a light dark
+     palette (near-black floor) makes a faint tint disappear entirely. */
+  background-color: color-mix(in srgb,
+    color-mix(in srgb, var(--callout-color) 28%, var(--background-primary)) 92%, transparent);
+  border: 2.8px solid;
+  border-color: var(--callout-color);
+  border-radius: 20px !important;
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+}
+/* Live Preview: der Hover-/Auswahl-Rahmen, den Obsidian um den Callout-Embed-Block
+   legt, nutzt sonst den Default-Radius → sichtbarer Mismatch zum 20px-Callout.
+   Radius (und den runden Hover-Hintergrund) an den Callout angleichen. */
+.markdown-source-view.mod-cm6 .cm-embed-block.cm-callout,
+.markdown-source-view.mod-cm6 .cm-embed-block:has(> .callout),
+.markdown-source-view.mod-cm6 .cm-embed-block:has(> .callout):hover {
+  border-radius: 20px !important;
+}
+.callout-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* Verschachtelte Callouts */
+.callout .callout .callout-title {
+  font-size: 1rem;
+  font-weight: 500;
+  font-style: italic;
+}
+.callout .callout {
+  font-size: 1rem;
+  border-radius: 24px;
+  background-color: var(--background-primary) !important;
+  margin: 20px 0 20px 0 !important;
+}
+
+/* Eigene Callout-Typen */
+.callout[data-callout="track_of_day"] {
+  --callout-icon: lucide-clipboard-list;
+  background-color: var(--callout-color);
+}
+.callout[data-callout="eating"] {
+  background-color: var(--callout-color);
+  --callout-icon: lucide-clipboard-list;
+}
+.callout[data-callout="fitness"] {
+  background-color: var(--callout-color);
+  --callout-icon: lucide-footprints;
+}
+
+
+/* ============================================================================
+ * 13. GRAPH-VIEW  —  Farben + Sternenkarten-Hintergrund  (früher: graph.css)
+ * ========================================================================== */
+
+/* Zwei-Ton-Look aus dem Paletten-System (robust via color-mix — KEIN
+   --interactive-accent-rgb-Triplet mehr, das war undefiniert → graue Defaults).
+   Notizen = Akzent (Indigo), Tags = 2. Farbe (Rosé/color5), Anhänge = color6,
+   offene Links gedimmt. Highlight-Kanten in der 2. Farbe → poppen beim Hover. */
+body .graph-view.color-fill            { color: var(--nx-accent, var(--interactive-accent)) !important; }
+body .graph-view.color-fill-tag        { color: var(--wl-color5, #e488ad) !important; }
+body .graph-view.color-fill-attachment { color: color-mix(in srgb, var(--wl-color6, #4fc9d6) 78%, transparent) !important; }
+body .graph-view.color-fill-unresolved { color: color-mix(in srgb, var(--nx-fg-muted, #8a8a95) 42%, transparent) !important; }
+body .graph-view.color-line            { color: color-mix(in srgb, var(--nx-accent, #7c83ff) 20%, transparent) !important; }
+body .graph-view.color-line-highlight  { color: color-mix(in srgb, var(--wl-color5, #f472b6) 85%, transparent) !important; }
+body .graph-view.color-arrow           { color: color-mix(in srgb, var(--nx-accent, #7c83ff) 55%, transparent) !important; }
+body .graph-view.color-circle          { color: var(--nx-accent, var(--interactive-accent)) !important; }
+body .graph-view.color-fill-highlight  { color: color-mix(in srgb, var(--nx-accent, #7c83ff) 32%, var(--nx-fg-bright, #ffffff)) !important; }
+body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, #e9e7f4) 88%, var(--nx-accent, #7c83ff)) !important; }
+
+/* Sternenkarten-Hintergrund (Dark) */
+.theme-dark .workspace-leaf-content[data-type="graph"] .view-content,
+.theme-dark .workspace-leaf-content[data-type="localgraph"] .view-content {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg stroke='rgb(200,215,235)' stroke-opacity='0.04' stroke-width='0.15'%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(11.25,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(33.75,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(56.25,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(78.75,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(101.25,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(123.75,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(146.25,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(168.75,50,50)'/%3E%3C/g%3E%3C/svg%3E"),
+    repeating-radial-gradient(circle at 50% 50%,
+      transparent 0px, transparent 59px,
+      rgba(200, 215, 235, 0.05) 60px, transparent 61px),
+    radial-gradient(circle at 50% 52%,
+      color-mix(in srgb, var(--nx-accent, #7c83ff) 15%, transparent) 0%,
+      color-mix(in srgb, var(--nx-accent, #7c83ff) 5%, transparent) 30%,
+      transparent 60%);
+  background-size: 100% 100%, 100% 100%, 150% 150%;
+  background-position: center, center, center;
+  background-repeat: no-repeat;
+}
+
+/* Sternenkarten-Hintergrund (Light) */
+.theme-light .workspace-leaf-content[data-type="graph"] .view-content,
+.theme-light .workspace-leaf-content[data-type="localgraph"] .view-content {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg stroke='rgb(60,70,90)' stroke-opacity='0.1' stroke-width='0.15'%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(11.25,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(33.75,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(56.25,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(78.75,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(101.25,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(123.75,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(146.25,50,50)'/%3E%3Cline x1='50' y1='-100' x2='50' y2='200' transform='rotate(168.75,50,50)'/%3E%3C/g%3E%3C/svg%3E"),
+    repeating-radial-gradient(circle at 50% 50%,
+      transparent 0px, transparent 59px,
+      rgba(60,70,90,0.1) 60px, transparent 61px),
+    radial-gradient(circle at 50% 52%,
+      color-mix(in srgb, var(--nx-accent, #7c83ff) 12%, transparent) 0%,
+      transparent 58%);
+  background-size: 100% 100%, 100% 100%, 150% 150%;
+  background-position: center, center, center;
+  background-repeat: no-repeat;
+}
+
+
+/* ============================================================================
+ * 14. PDF-EMBED  —  eingebettete PDFs  (früher: pdf-embed.css)
+ * ========================================================================== */
+
+/* Both the hard-forced 370x470 + overflow:hidden box AND display:none on the
+   toolbar turned out to leave PDF embeds rendering completely blank — likely
+   Obsidian's internal PDF viewer measuring/laying out its canvas against a
+   size it never got to react to properly. Backed off to the minimum: just a
+   soft max-height, no overflow clipping, no forced iframe/toolbar overrides —
+   let Obsidian size its own PDF viewer natively. Revisit with a gentler
+   toolbar-hiding technique once confirmed this alone renders correctly. */
+.internal-embed.pdf-embed:not(.image-embed) { max-height: 640px; }
+.image-container { max-width: 70%; }
+
+
+/* ============================================================================
+ * 15. MULTI-COLUMN  —  Multi Column Markdown  (früher: multi-column.css)
+ * ========================================================================== */
+
+.mcm-cm-preview {
+  margin: 0px;
+  background-color: transparent;
+}
+.mcm-column-parent-container {
+  border: 2px solid;
+  border-radius: 0px;
+  border-color: transparent;
+  margin: 1px;
+}
+.mcm-column-div,
+.mcm-column-border {
+  border: 1px solid;
+  border-color: color-mix(in srgb, transparent 60%, var(--text-accent) 40%);
+  margin: 0px;
+  background-color: transparent;
+  padding: 20px;
+  border-radius: 0px;
+  align-content: center;
+}
+.mcm-region-shadow { background-color: transparent; }
+
+
+/* ============================================================================
+ * 16. PROPERTY-HIDER  —  interne/Banner-Properties ausblenden  (früher: hide.css)
+ * ========================================================================== */
+
+.metadata-property[data-property-key="banner"],
+.metadata-property[data-property-key="banner-filename"],
+.metadata-property[data-property-key="banner-height"],
+.metadata-property[data-property-key="banner-fade"],
+.metadata-property[data-property-key="banner-x"],
+.metadata-property[data-property-key="banner-y"],
+.metadata-property[data-property-key="banner-radius"],
+.metadata-property[data-property-key="banner-content-start"],
+.metadata-property[data-property-key="banner-align"],
+.metadata-property[data-property-key="banner-display"],
+.metadata-property[data-property-key="content-start"],
+.metadata-property[data-property-key="cssclasses"] {
+  display: none !important;
+}
+
+
+/* ============================================================================
+ * 17. EXCALIDRAW  —  „Excalidraw Data"-Sektion ausblenden  (früher: excalidraw.css)
+ * ========================================================================== */
+
+/* Reading View */
+.markdown-preview-view :is(h1,h2,h3,h4,h5,h6)[data-heading="Excalidraw Data"],
+.markdown-preview-view :is(h1,h2,h3,h4,h5,h6)[data-heading="Excalidraw Data"] ~ * {
+  display: none !important;
+}
+
+/* Live Preview (CM6) */
+.markdown-source-view.mod-cm6 .cm-line:has(.cm-header:contains("Excalidraw Data")),
+.markdown-source-view.mod-cm6 .cm-line:has(.cm-header:contains("Excalidraw Data")) ~ .cm-line {
+  display: none !important;
+}
+
+/* Source Mode */
+.markdown-source-view.mod-source .cm-line:has-text("Excalidraw Data"),
+.markdown-source-view.mod-source .cm-line:has-text("Excalidraw Data") ~ .cm-line {
+  display: none !important;
+}
+
+
+/* ============================================================================
+ * 18. FONTS  —  lokale @font-face  (früher: fonts.css)
+ *     Pfad relativ zu dieser Datei: .obsidian/themes/Nexus/ → ../../fonts/
+ * ========================================================================== */
+
+@font-face {
+  font-family: 'Interceptor';
+  src: url('../../fonts/Interceptor.otf') format('opentype');
+}
+
+/* ============================================================================
+ * 19. RESPONSIVE / MOBILE  —  kompaktere Abstände & Radien auf kleinen
+ *     Bildschirmen bzw. schmalen Fenstern, damit das Card-Layout auch auf
+ *     Tablet/Handy luftig und „fancy" bleibt statt gequetscht.
+ * ========================================================================== */
+
+/* Handy (Obsidian setzt .is-phone): mehr Platz fürs Wesentliche, weichere Kanten
+   passen zu kleinen Flächen. */
+.is-phone {
+  --nx-gap: 8px;
+  --nx-radius: 12px;
+  --nx-r-tile: 8px;
+}
+
+/* Schmales Fenster am Desktop (z. B. vertikaler Split) bekommt dieselbe
+   Verdichtung — reagiert auf die Fensterbreite, nicht nur aufs Gerät. */
+@media (max-width: 620px) {
+  body {
+    --nx-gap: 8px;
+    --nx-radius: 12px;
+    --nx-r-tile: 8px;
+  }
+}
+
+/* Modal-Dialoge (Timer-Popup, Configs) auf schmalen Screens breiter nutzen,
+   damit sie nicht als winziges Kästchen mittig kleben. */
+@media (max-width: 620px) {
+  .modal:not(.mod-sidebar) {
+    width: min(94vw, 460px);
+    max-width: 94vw;
+  }
+  .nx-timerdone-title { font-size: 1.15em; }
+}
+
+/* ── Mobile Safe-Area (Android/iOS Statusleiste) ──────────────────────────────
+   Reserviert oben Platz, damit die Tab-Leiste NICHT hinter der Systemzeile
+   (WLAN/Bluetooth/Akku) verschwindet und klickbar bleibt. Diese Android-WebView
+   meldet env(safe-area-inset-top) teils als 0 → harter Floor via max(). */
+.is-mobile .app-container {
+  padding-top: max(env(safe-area-inset-top, 0px), 34px) !important;
+}
+
+
+/* ============================================================================
+ * 20. „NEXUS DUSK" — konsistentes, GEDÄMPFTES Flächen-System (nur `nexus`)
+ * ----------------------------------------------------------------------------
+ *  Aktiv über Body-Klasse `nx-blocked` (Plugin, nur `nexus`). Prinzip: EINE
+ *  warme Dark-Plum-Familie; jeder Flächen-TYP bekommt EINEN eigenen, leisen
+ *  Farbstich, aber alle liegen dicht im selben Helligkeitsband → WEICHE
+ *  Übergänge, KEIN harter Kontrast. Aubergine/Claret-Familie (Grün immer der
+ *  niedrigste Kanal → Pflaume/Wein statt Braun). Ladder (dunkel → hell):
+ *  Grund #1b1018 < Editor #221722 (ruhig) < Karten/Sidebar #2a1b27 (pflaume,
+ *  EINE Farbe für alle Karten) < Ordner #3b2030 (gedämpftes Wein/Claret).
+ *  Akzent = gedämpftes Coral, NUR auf Icons/Links/aktiv. Kein Patchwork,
+ *  kein Neon, kein Braun. Nur .theme-dark.
+ * ========================================================================== */
+body.nx-blocked.theme-dark {
+  /* Aubergine/Claret-Familie: Grün ist IMMER der niedrigste Kanal (B≥G) →
+     Pflaume/Wein-Unterton statt Braun. Enges Helligkeitsband = weich. */
+  --nx-desk:        #1b1018;   /* hinterster Grund (Aubergine-Schwarz)  */
+  --nx-chip:        #221722;   /* Editor — ruhige Pflaume-Lesefläche    */
+  --nx-floor:       #2a1b27;   /* Karten-Basis                          */
+  --nx-chip-side:   #2a1b27;   /* Karten / Sidebars / Dock (EINE Farbe) */
+  --nx-elevated:    #33253a;   /* Menüs / Inputs / Hover                */
+  --nx-border:      rgba(232, 220, 236, 0.07);   /* weiche Haarlinie    */
+
+  --nx-accent:      #db6a4b;   /* warmes Coral — Tint/aktiv (sparsam)   */
+  --nx-accent-fg:   #e5876a;   /* Text: Links/Überschriften/Icons       */
+  --nx-mark:        color-mix(in srgb, #db6a4b 26%, transparent);
+
+  --nx-fg:          #e6dee4;
+  --nx-fg-muted:    #948b93;
+  --nx-fg-bright:   #f4eef4;
+}
+
+/* Aktiver Tab: nur SANFT getönt (nicht laut). */
+body.nx-blocked.theme-dark .mod-root .workspace-tab-header.is-active {
+  background-color: color-mix(in srgb, var(--nx-accent) 18%, var(--nx-chip-side)) !important;
+}
+
+/* ── EXPLORER: die Ordner bekommen EINEN eigenen, GEDÄMPFTEN Wein/Claret-Ton
+      — dicht am Panel-Wert, also WEICH abgesetzt statt Neon; Purpur-Unterton
+      (kein Braun). Panel bleibt pflaume. ──────────────────────────────────── */
+body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) {
+  /* Ember → Prussian: Ember-Grundton nach Position (--i, oben am kräftigsten)
+     PLUS vertikaler Verlauf, der zum Fuß ins kühle Prussian kippt; je weiter
+     unten der Ordner, desto mehr Prussian → warm→kühl über die ganze Liste.
+     --fld-tint/--i werden vom Basis-Block (body.nx-explorer-folders …) berechnet. */
+  background: var(--fld-tint) !important;
+  border: 1px solid color-mix(in srgb, var(--nx-fg-bright) 7%, transparent) !important;
+}
+body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) .tree-item-self,
+body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) .nav-folder-title,
+body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) .nav-file-title {
+  color: var(--nx-fg-bright) !important;
+}
+/* Hover: die GANZE flache Pill gleichmäßig aufhellen — KEIN inneres Kästchen,
+   kein Ring (das wirkte wie eine Box-in-Box). :has() lässt den Block reagieren,
+   wenn seine Titelzeile gehovert wird; die Titelzeile selbst bleibt transparent,
+   damit die aufgehellte Blockfläche durchgängig zu sehen ist. */
+body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item):has(> .tree-item-self.nav-folder-title:hover) {
+  background: color-mix(in srgb, #ffffff 12%, var(--fld-tint)) !important;
+}
+body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item)
+  > .tree-item-self.nav-folder-title:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--nx-fg-bright) !important;
+}
+/* Kind-Dateien im aufgeklappten Block: dezenter Hover (ganze Zeile, flach) */
+body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item)
+  .nav-folder-children .tree-item-self:hover {
+  background: color-mix(in srgb, #ffffff 8%, var(--fld-tint)) !important;
+}
+body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) .tree-item-self.is-active {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--nx-accent-fg) !important;
+}
+/* Fallback ohne Ordner-Block-Modus: Ordner-Titelzeile terracotta. */
+body.nx-blocked.theme-dark:not(.nx-explorer-folders)
+  .workspace-leaf-content[data-type="file-explorer"] .nav-folder-title {
+  background: #3b2030 !important;   /* gedämpftes Wein/Claret statt Terracotta */
+  border-radius: var(--nx-r-tile) !important;
+}
+
+/* ── Dashboard KONSISTENT: alle Stat-Kacheln & Karten = EINE Farbe (Karten-Ton),
+      kein Patchwork. Akzent nur auf Icon. Überschreibt 04-homepage.css. ────── */
+body.nx-blocked.theme-dark .nx-home-stat,
+body.nx-blocked.theme-dark .nx-home-card:not(.nx-noborder) {
+  background: var(--nx-chip-side) !important;
+  border-color: var(--nx-border) !important;
+}
+body.nx-blocked.theme-dark .nx-home-stat.is-editing:hover,
+body.nx-blocked.theme-dark .nx-home-card:not(.nx-noborder):hover {
+  background: var(--nx-elevated) !important;
+}
+body.nx-blocked.theme-dark .nx-home-stat .nx-home-stat-icon,
+body.nx-blocked.theme-dark .nx-home-card .nx-home-card-icon {
+  color: var(--nx-accent-fg) !important;
+}
