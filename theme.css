@@ -1012,21 +1012,21 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
  * ========================================================================== */
 
 .callout {
-  /* --callout-color is ALREADY a complete, valid <color> — Obsidian's own
-     built-in callouts define it as e.g. var(--callout-success), and our plugin
-     now wraps its custom callout colors in rgb() once at the source (see
-     applyCallouts() in main.js). Do NOT wrap it again here with rgb() — that
-     nests a color inside rgb()'s channel arguments, which is invalid and gets
-     silently dropped (falls back to currentColor — that's why only the icon/
-     title, which Obsidian styles itself, was ever colored while the border
-     silently fell back to plain text color). */
+  /* --callout-color is a BARE "r, g, b" TRIPLET, not a <color> — Obsidian core
+     defines it as e.g. `--callout-default: var(--color-blue-rgb)` (= "2, 122,
+     255") and always consumes it as rgb(var(--callout-color)) / rgba(…, .1).
+     So every use site here needs rgb() around it; without it the declaration is
+     invalid and gets silently dropped — which is exactly why callouts lost
+     their fill and border colour while the title/icon (styled by Obsidian
+     itself) stayed coloured. Our plugin emits the same triplet form. */
   /* --background-primary IS the editor background the callout sits on, so the
      tint has to be strong enough to read against it on its own — a light dark
      palette (near-black floor) makes a faint tint disappear entirely. */
+  --nx-callout-tint: 28%;
   background-color: color-mix(in srgb,
-    color-mix(in srgb, var(--callout-color) 28%, var(--background-primary)) 92%, transparent);
+    color-mix(in srgb, rgb(var(--callout-color)) var(--nx-callout-tint), var(--background-primary)) 92%, transparent);
   border: 2.8px solid;
-  border-color: var(--callout-color);
+  border-color: rgb(var(--callout-color));
   border-radius: 20px !important;
   border-right: none;
   border-top: none;
@@ -1058,18 +1058,20 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   margin: 20px 0 20px 0 !important;
 }
 
-/* Eigene Callout-Typen */
+/* Eigene Callout-Typen — kräftiger gefüllt als der Rest, aber über dieselbe
+   Tint-Formel (ein voll gesättigter Farbblock killt die Lesbarkeit des
+   Fließtexts darauf). */
 .callout[data-callout="track_of_day"] {
   --callout-icon: lucide-clipboard-list;
-  background-color: var(--callout-color);
+  --nx-callout-tint: 45%;
 }
 .callout[data-callout="eating"] {
-  background-color: var(--callout-color);
   --callout-icon: lucide-clipboard-list;
+  --nx-callout-tint: 45%;
 }
 .callout[data-callout="fitness"] {
-  background-color: var(--callout-color);
   --callout-icon: lucide-footprints;
+  --nx-callout-tint: 45%;
 }
 
 
