@@ -1079,20 +1079,39 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
  * 13. GRAPH-VIEW  —  Farben + Sternenkarten-Hintergrund  (früher: graph.css)
  * ========================================================================== */
 
-/* Zwei-Ton-Look aus dem Paletten-System (robust via color-mix — KEIN
-   --interactive-accent-rgb-Triplet mehr, das war undefiniert → graue Defaults).
-   Notizen = Akzent (Indigo), Tags = 2. Farbe (Rosé/color5), Anhänge = color6,
-   offene Links gedimmt. Highlight-Kanten in der 2. Farbe → poppen beim Hover. */
-body .graph-view.color-fill            { color: var(--nx-accent, var(--interactive-accent)) !important; }
-body .graph-view.color-fill-tag        { color: var(--wl-color5, #e488ad) !important; }
-body .graph-view.color-fill-attachment { color: color-mix(in srgb, var(--wl-color6, #4fc9d6) 78%, transparent) !important; }
+/* Die drei Knotenarten bekommen die drei Leitfarben der Palette, die Kanten die
+   vierte — direkt aus den Paletten-Slots, nicht aus --nx-accent, damit jede
+   Farbe wirklich die Swatch-Farbe ist und nicht deren gedämpfte Flächen-Variante:
+
+     Notizen  = Madder      → color1  (warmer Rot-/Orange-Slot)
+     Tags      = Prussian    → color4  (Blau-Slot; in „nexus" identisch color5)
+     Anhänge   = Rain Boots ⊕ Prussian — dieselbe Familie wie die Notizen, aber
+                 mit dem Blau gebrochen, also klar unterscheidbar ohne 5. Farbe
+     Kanten    = Rain Boots  → color3  (gelblicher Orange-Slot)
+
+   ANSI-Slots statt Hex, damit die Zuordnung bei jeder anderen Palette dieselbe
+   Logik behält (rot/blau/gelb sitzen dort auf denselben Nummern).
+   color-mix statt --interactive-accent-rgb: das Triplet war undefiniert → graue
+   Defaults.
+
+   Die beiden Zahlen sind am gerenderten Graphen abgestimmt (60/20): Prussian pur
+   ist die DUNKELSTE der vier Rollen und würde auf dem Aubergine-Grund
+   zurücktreten statt als Hub aufzufallen — 40 % Prussian auf color6 (dem hellen
+   Prussian derselben Familie) hebt es auf #2f5876, ohne die Farbe zu verlassen.
+   Die Kanten laufen bei 20 %, weil sie in der Masse sonst die Knoten zudecken. */
+body .graph-view.color-fill            { color: var(--wl-color1, #ce3737) !important; }
+body .graph-view.color-fill-tag        { color: color-mix(in srgb, var(--wl-color4, #1b3854) 40%, var(--wl-color6, #3d6d8c)) !important; }
+body .graph-view.color-fill-attachment { color: color-mix(in srgb, var(--wl-color3, #fb6734) 55%, var(--wl-color4, #1b3854)) !important; }
 body .graph-view.color-fill-unresolved { color: color-mix(in srgb, var(--nx-fg-muted, #8a8a95) 42%, transparent) !important; }
-body .graph-view.color-line            { color: color-mix(in srgb, var(--nx-accent, #7c83ff) 20%, transparent) !important; }
-body .graph-view.color-line-highlight  { color: color-mix(in srgb, var(--wl-color5, #f472b6) 85%, transparent) !important; }
-body .graph-view.color-arrow           { color: color-mix(in srgb, var(--nx-accent, #7c83ff) 55%, transparent) !important; }
-body .graph-view.color-circle          { color: var(--nx-accent, var(--interactive-accent)) !important; }
-body .graph-view.color-fill-highlight  { color: color-mix(in srgb, var(--nx-accent, #7c83ff) 32%, var(--nx-fg-bright, #ffffff)) !important; }
-body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, #e9e7f4) 88%, var(--nx-accent, #7c83ff)) !important; }
+body .graph-view.color-line            { color: color-mix(in srgb, var(--wl-color3, #fb6734) 20%, transparent) !important; }
+body .graph-view.color-line-highlight  { color: color-mix(in srgb, var(--wl-color3, #fb6734) 88%, transparent) !important; }
+body .graph-view.color-arrow           { color: color-mix(in srgb, var(--wl-color3, #fb6734) 60%, transparent) !important; }
+body .graph-view.color-circle          { color: var(--wl-color3, #fb6734) !important; }
+/* Hover/Fokus: dieselbe Kantenfarbe, nur ins Helle gezogen — der Knoten poppt
+   heraus, ohne eine fünfte Farbe einzuführen. */
+body .graph-view.color-fill-highlight  { color: color-mix(in srgb, var(--wl-color3, #fb6734) 45%, var(--nx-fg-bright, #ffffff)) !important; }
+body .graph-view.color-fill-focused    { color: color-mix(in srgb, var(--wl-color3, #fb6734) 70%, var(--nx-fg-bright, #ffffff)) !important; }
+body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, #e9e7f4) 88%, var(--wl-color3, #fb6734)) !important; }
 
 /* Sternenkarten-Hintergrund (Dark) */
 .theme-dark .workspace-leaf-content[data-type="graph"] .view-content,
@@ -1103,8 +1122,8 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
       transparent 0px, transparent 59px,
       rgba(200, 215, 235, 0.05) 60px, transparent 61px),
     radial-gradient(circle at 50% 52%,
-      color-mix(in srgb, var(--nx-accent, #7c83ff) 15%, transparent) 0%,
-      color-mix(in srgb, var(--nx-accent, #7c83ff) 5%, transparent) 30%,
+      color-mix(in srgb, var(--wl-color3, #fb6734) 13%, transparent) 0%,
+      color-mix(in srgb, var(--wl-color3, #fb6734) 4%, transparent) 30%,
       transparent 60%);
   background-size: 100% 100%, 100% 100%, 150% 150%;
   background-position: center, center, center;
@@ -1120,7 +1139,7 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
       transparent 0px, transparent 59px,
       rgba(60,70,90,0.1) 60px, transparent 61px),
     radial-gradient(circle at 50% 52%,
-      color-mix(in srgb, var(--nx-accent, #7c83ff) 12%, transparent) 0%,
+      color-mix(in srgb, var(--wl-color3, #fb6734) 12%, transparent) 0%,
       transparent 58%);
   background-size: 100% 100%, 100% 100%, 150% 150%;
   background-position: center, center, center;
@@ -1255,6 +1274,27 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
     max-width: 94vw;
   }
   .nx-timerdone-title { font-size: 1.15em; }
+}
+
+/* Properties: die feste 160px-Key-Spalte (Abschnitt 10c) lässt auf einem Handy
+   kaum Platz für den Wert — Key über Wert stapeln, genau wie es das
+   Properties-Side-Panel ohnehin schon tut. */
+@media (max-width: 620px) {
+  .metadata-property {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+  }
+  .metadata-property-key {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    margin: 0 0 3px 0 !important;
+  }
+  .metadata-property-value { width: 100%; }
+
+  /* Bilder auf 70 % der Textbreite (Abschnitt 14) sind auf dem Handy
+     Briefmarken — dort die volle Spaltenbreite. */
+  .image-container { max-width: 100%; }
 }
 
 /* ── Mobile Safe-Area (Android/iOS Statusleiste) ──────────────────────────────
