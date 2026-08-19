@@ -1411,3 +1411,205 @@ body.nx-blocked.theme-dark .nx-home-stat .nx-home-stat-icon,
 body.nx-blocked.theme-dark .nx-home-card .nx-home-card-icon {
   color: var(--nx-accent-fg) !important;
 }
+
+
+/* ============================================================================
+ * 21. STYLE „ALMOST NOTHING"  —  body.nx-style-plain  (Plugin: Theme → Style)
+ * ----------------------------------------------------------------------------
+ *  Der zweite Style neben mirobo (Abschnitt 6). mirobo baut aus jedem Bereich
+ *  eine schwebende Card; dieser hier baut GAR NICHTS: eine durchgehende Fläche,
+ *  Haarlinien statt Rändern, fast kein Radius, kein Akzent auf Flächen. Der
+ *  Akzent bleibt nur dort, wo er Bedeutung trägt (Links, aktiv, Marker).
+ *
+ *  Er steht bewusst am ENDE der Datei: einige Regeln müssen die !important-
+ *  Regeln aus Abschnitt 6/7/20 überstimmen, und bei gleicher Spezifität gewinnt
+ *  die spätere. Die Palette bleibt frei wählbar — der Style formt, die Palette
+ *  färbt.
+ * ========================================================================== */
+
+body.nx-style-plain {
+  --nx-radius:  4px;
+  --nx-r-tile:  4px;
+  --nx-gap:     0px;
+  --nx-tab-gap: 4px;
+  --nx-bar-h:   36px;
+
+  --radius-s: 4px;
+  --radius-m: 6px;
+  --radius-l: 8px;
+  --nx-chip-shadow: none;
+  --tab-radius: 4px;
+  --tab-radius-active: 4px;
+}
+
+/* ── Schreibtisch weg: EINE Fläche, keine Lücken ── */
+body.nx-style-plain .horizontal-main-container { padding: 0 !important; }
+body.nx-style-plain,
+body.nx-style-plain .workspace,
+body.nx-style-plain .workspace-split,
+body.nx-style-plain .horizontal-main-container,
+body.nx-style-plain .titlebar,
+body.nx-style-plain .status-bar { background-color: var(--nx-chip) !important; }
+
+/* ── Cards → Flächen. Getrennt wird durch eine Haarlinie, nicht durch Luft. ── */
+body.nx-style-plain .workspace-tab-header-container,
+body.nx-style-plain .workspace-tab-container {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background-color: var(--nx-chip) !important;
+}
+body.nx-style-plain .mod-left-split .workspace-tab-header-container,
+body.nx-style-plain .mod-left-split .workspace-tab-container,
+body.nx-style-plain .mod-right-split .workspace-tab-header-container,
+body.nx-style-plain .mod-right-split .workspace-tab-container {
+  background-color: var(--nx-chip-side) !important;
+}
+body.nx-style-plain .mod-left-split { border-right: 1px solid var(--nx-border) !important; }
+body.nx-style-plain .mod-right-split { border-left: 1px solid var(--nx-border) !important; }
+/* Tableiste: nur die Linie zum Text hin */
+body.nx-style-plain .mod-root .workspace-tab-header-container {
+  border-bottom: 1px solid var(--nx-border) !important;
+  padding-inline: 6px !important;
+}
+
+/* Tabs: keine Pillen. Aktiv = etwas hellere Fläche, sonst nichts.
+   (Die Kette mit .workspace-split.mod-root schlägt Abschnitt 20 bei gleicher
+   Spezifität über die Reihenfolge — deshalb steht dieser Abschnitt am Ende.) */
+body.nx-style-plain .workspace-tab-header {
+  background-color: transparent !important;
+  border-radius: 4px !important;
+}
+body.nx-style-plain .workspace-split.mod-root .workspace-tab-header.is-active {
+  background-color: color-mix(in srgb, var(--nx-fg) 8%, transparent) !important;
+}
+body.nx-style-plain .workspace-tab-header:hover {
+  background-color: color-mix(in srgb, var(--nx-fg) 5%, transparent) !important;
+}
+
+/* Ribbon + Vault-Wähler: Teil der Seitenleiste, keine eigenen Karten. */
+body.nx-style-plain .workspace-ribbon.mod-left,
+body.nx-style-plain .side-dock-ribbon.mod-left {
+  margin: 0 !important;
+  border: none !important;
+  border-right: 1px solid var(--nx-border) !important;
+  border-radius: 0 !important;
+  background-color: var(--nx-chip-side) !important;
+  box-shadow: none !important;
+}
+body.nx-style-plain .workspace-sidedock-vault-profile {
+  margin: 0 !important;
+  border: none !important;
+  border-bottom: 1px solid var(--nx-border) !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+}
+
+/* ── Explorer: keine Ordner-Blöcke, keine Tönung — nur Zeilen. ── */
+body.nx-style-plain.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item),
+body.nx-style-plain.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) {
+  background: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+body.nx-style-plain .nav-files-container { margin-top: 6px !important; }
+body.nx-style-plain .nav-file-title,
+body.nx-style-plain .nav-folder-title {
+  border-radius: 4px;
+  margin-inline: 2px;
+}
+body.nx-style-plain .nav-files-container .tree-item:not(.tree-item .tree-item)
+  > .nav-folder-title .nav-folder-title-content {
+  letter-spacing: 0 !important;
+  margin-bottom: 0 !important;
+}
+body.nx-style-plain .nav-file-title.is-active {
+  background-color: color-mix(in srgb, var(--nx-fg) 9%, transparent) !important;
+  color: var(--nx-fg-bright) !important;
+}
+body.nx-style-plain .nav-folder-title-content:hover { color: var(--nx-fg-bright) !important; }
+
+/* ── Text: die Hierarchie kommt aus Größe und Gewicht, nicht aus Farbe. ── */
+body.nx-style-plain .markdown-rendered {
+  --h1-color: var(--nx-fg-bright);
+  --h2-color: var(--nx-fg-bright);
+  --h3-color: var(--nx-fg-bright);
+  --h4-color: var(--nx-fg-bright);
+  --h5-color: var(--nx-fg);
+  --h6-color: var(--nx-fg-muted);
+  --h1-weight: 700;
+  --h2-weight: 700;
+  --h3-weight: 600;
+  --h4-weight: 600;
+}
+body.nx-style-plain .markdown-rendered h6 { letter-spacing: .04em; }
+body.nx-style-plain .markdown-rendered ul > li::marker,
+body.nx-style-plain .markdown-rendered ol > li::marker,
+body.nx-style-plain .cm-editor .cm-formatting-list { color: var(--nx-fg-muted); }
+/* Trenner: eine Linie, kein Verlauf. */
+body.nx-style-plain .markdown-rendered hr {
+  height: 1px;
+  background: var(--nx-border);
+}
+/* Zitat: grauer Balken, kein Tint, nicht kursiv (Notion-Lesart). */
+body.nx-style-plain .markdown-rendered blockquote,
+body.nx-style-plain .cm-editor .cm-blockquote {
+  border-left: 3px solid color-mix(in srgb, var(--nx-fg) 35%, transparent);
+  border-radius: 0;
+}
+body.nx-style-plain .markdown-rendered blockquote {
+  background: transparent;
+  font-style: normal;
+  color: var(--nx-fg);
+}
+/* Code: neutrale Fläche statt Akzent-Tönung. */
+body.nx-style-plain :not(pre) > code {
+  background-color: color-mix(in srgb, var(--nx-fg) 10%, transparent);
+  border-radius: 3px;
+}
+body.nx-style-plain .markdown-rendered pre,
+body.nx-style-plain .cm-editor .HyperMD-codeblock-bg { border-radius: 4px; }
+body.nx-style-plain .markdown-rendered sup.footnote-ref a,
+body.nx-style-plain .markdown-rendered .footnote-ref a {
+  background: transparent;
+  color: var(--nx-accent-fg);
+  padding: 0 .15em;
+}
+
+/* Callouts: eine ruhige graue Fläche mit farbiger Kante links (Notion-Lesart) —
+   die Farbe steckt in Kante, Icon und Titel, nicht in der ganzen Fläche.
+   Titel in Textgröße: die 1.4rem aus Abschnitt 12 sind hier eine Überschrift. */
+body.nx-style-plain .callout {
+  border-radius: 3px !important;
+  border: none !important;
+  border-left: 3px solid rgb(var(--callout-color)) !important;
+  box-shadow: none !important;
+  background-color: color-mix(in srgb, var(--nx-fg) 5%, transparent) !important;
+}
+body.nx-style-plain .callout-title {
+  font-size: 1em;
+  font-weight: 600;
+}
+
+/* Menüs, Modals, Eingaben: dünne Linie, kaum Radius, kein großer Schatten. */
+body.nx-style-plain .menu,
+body.nx-style-plain .modal,
+body.nx-style-plain .suggestion-container,
+body.nx-style-plain .prompt {
+  border-radius: 6px !important;
+  border: 1px solid var(--nx-border) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .18) !important;
+  background-color: var(--nx-elevated) !important;
+}
+body.nx-style-plain input[type="text"],
+body.nx-style-plain input[type="search"],
+body.nx-style-plain input[type="number"],
+body.nx-style-plain textarea,
+body.nx-style-plain select,
+body.nx-style-plain button {
+  border-radius: 4px !important;
+}
