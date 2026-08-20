@@ -1012,25 +1012,26 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
  * ========================================================================== */
 
 .callout {
-  /* --callout-color is a BARE "r, g, b" TRIPLET, not a <color> — Obsidian core
-     defines it as e.g. `--callout-default: var(--color-blue-rgb)` (= "2, 122,
-     255") and always consumes it as rgb(var(--callout-color)) / rgba(…, .1).
-     So every use site here needs rgb() around it; without it the declaration is
-     invalid and gets silently dropped — which is exactly why callouts lost
-     their fill and border colour while the title/icon (styled by Obsidian
-     itself) stayed coloured. Our plugin emits the same triplet form. */
-  /* --background-primary IS the editor background the callout sits on, so the
-     tint has to be strong enough to read against it on its own — a light dark
-     palette (near-black floor) makes a faint tint disappear entirely. */
-  --nx-callout-tint: 28%;
+  /* --callout-color is a COLOUR, not a triplet. Obsidian defines its own as
+     `--callout-quote: #9e9e9e` / `var(--color-blue)` and consumes them as
+     `color-mix(in oklch, var(--callout-color) 10%, transparent)`.
+     `rgb(var(--callout-color))` — which this rule used, from the days when the
+     variable really was a triplet — is INVALID for those values, so the whole
+     declaration was dropped: every callout that takes its colour from Obsidian
+     (quote, note, any type without a colour of its own) lost its fill and its
+     border fell back to the text colour, while the plugin's own types still
+     worked. Never wrap it again; the plugin converts its stored triplets on the
+     way out (main.js · applyCallouts).
+
+     KEIN Rahmen: die Farbe steckt in der FLÄCHE, ruhig getönt — ein farbiger
+     Block, kein umrandeter Kasten. Gemischt wird in --background-primary (die
+     Fläche darunter), nicht auf transparent, damit die Tönung auf jedem
+     Notiz-Hintergrund gleich ruhig bleibt. */
+  --nx-callout-tint: 16%;
   background-color: color-mix(in srgb,
-    color-mix(in srgb, rgb(var(--callout-color)) var(--nx-callout-tint), var(--background-primary)) 92%, transparent);
-  border: 2.8px solid;
-  border-color: rgb(var(--callout-color));
+    var(--callout-color) var(--nx-callout-tint), var(--background-primary));
+  border: none;
   border-radius: 20px !important;
-  border-right: none;
-  border-top: none;
-  border-bottom: none;
 }
 /* Live Preview: der Hover-/Auswahl-Rahmen, den Obsidian um den Callout-Embed-Block
    legt, nutzt sonst den Default-Radius → sichtbarer Mismatch zum 20px-Callout.
@@ -1041,7 +1042,10 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   border-radius: 20px !important;
 }
 .callout-title {
-  font-size: 1.4rem;
+  /* em, not rem: inside a note with its own font size (handwritten/mono) a rem
+     stays glued to the app's root size and the callout title suddenly reads
+     smaller than the text under it. */
+  font-size: 1.4em;
   font-weight: 700;
 }
 
@@ -1733,15 +1737,14 @@ body.nx-style-plain .cm-editor .cm-highlight {
   padding: .1em .15em;
 }
 
-/* Callout = Notions graue Karte: eine getönte Fläche, 4px Radius, Farbe nur
-   im Icon. Kein Rahmen, keine Kante, kein Farbfeld. */
+/* Callout: dieselbe getönte Fläche wie in Abschnitt 12, nur flacher und eine
+   Spur leiser — kein Rahmen, keine Kante, die Farbe liegt in der Fläche. */
 body.nx-style-plain .callout {
+  --nx-callout-tint: 11%;
   border-radius: 4px !important;
   border: none !important;
   box-shadow: none !important;
-  background-color: var(--nx-surface-2) !important;
   padding: 14px 16px !important;
-  mix-blend-mode: normal;
 }
 body.nx-style-plain .callout-title {
   font-size: 1em;
@@ -1750,7 +1753,7 @@ body.nx-style-plain .callout-title {
   padding: 0;
   gap: 8px;
 }
-body.nx-style-plain .callout-icon { color: rgb(var(--callout-color)); }
+body.nx-style-plain .callout-icon { color: var(--callout-color); }
 body.nx-style-plain .callout-content { padding-top: 4px; }
 body.nx-style-plain .callout-content > :first-child { margin-top: 0; }
 
