@@ -1023,13 +1023,23 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
      worked. Never wrap it again; the plugin converts its stored triplets on the
      way out (main.js · applyCallouts).
 
+     ABER: welche Schreibweise gilt, haengt an der OBSIDIAN-VERSION, nicht am
+     Vault. Auf einem Geraet, das die Umstellung noch nicht mitgemacht hat, ist
+     --callout-color weiter ein Triplet, `color-mix()` damit ungueltig und die
+     ganze Deklaration faellt weg -> derselbe Vault sah auf zwei Geraeten
+     unterschiedlich aus. Darum wird hier --nx-callout-c gelesen: das
+     normalisiert das Plugin zur Laufzeit auf eine echte FARBE, passend zur
+     jeweiligen Obsidian-Version (main.js · _calloutTripletMode). Der
+     var()-Fallback haelt das Theme allein lauffaehig, solange Obsidian aktuell
+     ist.
+
      KEIN Rahmen: die Farbe steckt in der FLÄCHE, ruhig getönt — ein farbiger
      Block, kein umrandeter Kasten. Gemischt wird in --background-primary (die
      Fläche darunter), nicht auf transparent, damit die Tönung auf jedem
      Notiz-Hintergrund gleich ruhig bleibt. */
   --nx-callout-tint: 16%;
   background-color: color-mix(in srgb,
-    var(--callout-color) var(--nx-callout-tint), var(--background-primary));
+    var(--nx-callout-c, var(--callout-color)) var(--nx-callout-tint), var(--background-primary));
   border: none;
   border-radius: 20px !important;
 }
@@ -1753,7 +1763,7 @@ body.nx-style-plain .callout-title {
   padding: 0;
   gap: 8px;
 }
-body.nx-style-plain .callout-icon { color: var(--callout-color); }
+body.nx-style-plain .callout-icon { color: var(--nx-callout-c, var(--callout-color)); }
 body.nx-style-plain .callout-content { padding-top: 4px; }
 body.nx-style-plain .callout-content > :first-child { margin-top: 0; }
 
