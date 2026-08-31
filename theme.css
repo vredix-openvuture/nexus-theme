@@ -480,33 +480,47 @@ div[data-path*='scribbles'] + div.nav-folder-children {
   color: var(--interactive-accent) !important;
 }
 
-/* ── Top-level folders as tinted BLOCKS whose tone follows a vertical gradient
-   down the theme (strong at the top, quiet at the bottom) ── (body class from
-   the Nexus Suite plugin).
-   The colour sits on the WHOLE folder block (.tree-item.nav-folder), children
-   included, so an expanded folder's contents live in the same block as their
-   parent. Each block takes its tone from its position (--i), which produces a
-   gradient down the list — separate blocks, as in the reference picture.
-   --i is set with :nth-child; spacers and files skip numbers, but the order
-   stays monotonic, so it always reads as a gradient.
-   The control is --nx-fld-intensity (a plugin slider) = the base strength of
-   the topmost block. */
+/* ── Top-level folders marked by a RAIL, not by a filled block ── (body class
+   from the Nexus Suite plugin).
+
+   The rail replaced a tinted block, and the reason is worth keeping: a sidebar
+   is short of exactly one thing, width, and a block spends it twice — once on
+   its own margin and once on its inner padding. A folder is also not a category
+   with a weight; it is a place. A rail marks the place at a tenth of the ink and
+   hands the accent back to the one thing that genuinely needs it, which is the
+   file you are looking at.
+
+   Colour still groups. Each rail takes its tone from the folder's position
+   (--i), warm Ember at the top of the list tipping to cool Prussian at the
+   foot — the same identity the blocks carried, drawn as a line instead of a
+   field. --i is set with :nth-child; spacers and files skip numbers, but the
+   order stays monotonic, so it always reads as a gradient.
+
+   The control is --nx-fld-intensity (a plugin slider): here it sets how present
+   the rail is, from a hairline hint to a firm mark. */
 body.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item) {
   --i: 6;
-  /* Ember → Prussian: each block takes an Ember base tone from its position
-     (--i, strongest at the top of the list), PLUS a vertical gradient that tips
-     toward the cool Prussian (--wl-color5) at its foot — and the further down
-     the folder sits, the more Prussian it gets (a gradient over the whole list,
-     warm to cool). */
-  --fld-acc:  clamp(4%, calc(var(--nx-fld-intensity, 22%) + 36%), 82%);   /* the same for ALL folders (no positional sweep) */
-  --fld-tint: color-mix(in srgb, var(--wl-color5, #1b3854) var(--fld-acc), var(--nx-chip-side));   /* Prussian-Blau als Grundton */
-  margin: 4px 10px;
-  padding: 2px;
+  /* How far down the list this folder sits, 0 → 1.
+     Spread over SEVEN steps, not over the sixteen :nth-child can reach: a vault
+     has four to eight top-level folders, and a sweep sized for sixteen leaves a
+     real one entirely in the warm end — the gradient exists but nobody sees it.
+     Anything past the eighth folder stays at the cool end, which is where the
+     bottom of a long list belongs anyway. */
+  --fld-pos: min(1, calc(var(--i, 0) / 7));
+  /* Ember → Prussian across the list. */
+  --fld-hue: color-mix(in srgb,
+    var(--wl-color5, #1b3854) calc(var(--fld-pos) * 100%),
+    var(--nx-accent, #fb6734));
+  /* The slider sets presence, not fill: even at its lowest the rail is visible,
+     because an invisible rail is the same as no rail. */
+  --fld-acc: clamp(45%, calc(var(--nx-fld-intensity, 22%) + 40%), 100%);
+  margin: 1px 8px 6px;
+  padding: 0 0 0 9px;
   border: none;
-  border-radius: var(--nx-radius);
-  overflow: hidden;
-  background: var(--fld-tint);
+  border-left: 2px solid color-mix(in srgb, var(--fld-hue) var(--fld-acc), transparent);
+  border-radius: 0;
+  background: none;
 }
 
 body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(1)  { --i: 0;  }
@@ -537,7 +551,7 @@ body.nx-explorer-folders .nav-files-container
   margin: 0;
   min-height: 0 !important;   /* drop Obsidian's forced height → the title wraps its content */
   height: auto !important;
-  padding: 3px 10px;
+  padding: 3px 6px;
   border-radius: var(--nx-r-tile);
   font-weight: 600;
   color: var(--nx-fg-bright);
@@ -586,16 +600,21 @@ body.nx-explorer-folders .nav-files-container
   color: var(--nx-fg-bright);
 }
 
-/* Hover on a folder title row: a soft, half-transparent lift instead of the
-   generic grey --background-modifier-hover box (around line 456). The block
-   tint shows through, a faint light inner border raises the pill, and the text
-   stays creamy rather than the loud orange from around line 478. */
+/* Hover on a folder title row: a quiet lift, and nothing else. No inner border
+   and no ring — those existed to raise a pill off a filled block, and without
+   the block they read as a box drawn around one line. The text stays creamy
+   rather than turning the loud orange from around line 478. */
 body.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item)
   > .tree-item-self.nav-folder-title:hover {
-  background: color-mix(in srgb, var(--nx-fg-bright) 11%, transparent) !important;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nx-fg-bright) 15%, transparent);
+  background: color-mix(in srgb, var(--nx-fg-bright) 9%, transparent) !important;
   color: var(--nx-fg-bright) !important;
+}
+/* The rail brightens with it, so the hover reads as "this folder" rather than
+   as "this row". */
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item):hover {
+  border-left-color: var(--fld-hue);
 }
 body.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item)
@@ -1364,19 +1383,10 @@ body.nx-blocked.theme-dark .mod-root .workspace-tab-header.is-active {
   background-color: color-mix(in srgb, var(--nx-accent) 18%, var(--nx-chip-side)) !important;
 }
 
-/* ── EXPLORER: the folders take ONE muted wine/claret tone of their own — close
-      to the panel value, so it is SOFTLY set off rather than neon, with a purple
-      undertone and no brown. The panel stays plum. ─────────────────────────── */
-body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
-  .tree-item.nav-folder:not(.tree-item .tree-item) {
-  /* Ember → Prussian: an Ember base tone from the position (--i, strongest at the
-     top) PLUS a vertical gradient tipping into the cool Prussian at the foot; the
-     further down the folder, the more Prussian → warm to cool across the whole
-     list. --fld-tint and --i are worked out by the base block
-     (body.nx-explorer-folders …). */
-  background: var(--fld-tint) !important;
-  border: 1px solid color-mix(in srgb, var(--nx-fg-bright) 7%, transparent) !important;
-}
+/* ── EXPLORER on the dusk palette: nothing to add. The folders are marked by a
+      rail (section 7), and a rail needs no surface of its own — which is most of
+      why it was chosen. What is left here is the text colour on the panel, and
+      the hover. ─────────────────────────────────────────────────────────────── */
 body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item) .tree-item-self,
 body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
@@ -1385,26 +1395,19 @@ body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item) .nav-file-title {
   color: var(--nx-fg-bright) !important;
 }
-/* Hover: lighten the WHOLE flat pill evenly — NO inner box and no ring, which
-   read as a box inside a box. :has() lets the block react when its title row is
-   hovered; the title row itself stays transparent, so the lightened block face
-   is visible all the way across. */
-body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
-  .tree-item.nav-folder:not(.tree-item .tree-item):has(> .tree-item-self.nav-folder-title:hover) {
-  background: color-mix(in srgb, #ffffff 12%, var(--fld-tint)) !important;
-}
+/* Hover: the row lifts, and the rail brightens with it. */
 body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item)
   > .tree-item-self.nav-folder-title:hover {
-  background: transparent !important;
+  background: color-mix(in srgb, #ffffff 9%, transparent) !important;
   box-shadow: none !important;
   color: var(--nx-fg-bright) !important;
 }
-/* Child files in an expanded block: a quiet hover on the whole row, flat */
+/* Child files under an expanded folder: a quiet hover on the whole row, flat */
 body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item)
   .nav-folder-children .tree-item-self:hover {
-  background: color-mix(in srgb, #ffffff 8%, var(--fld-tint)) !important;
+  background: color-mix(in srgb, #ffffff 7%, transparent) !important;
 }
 body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item) .tree-item-self.is-active {
@@ -1914,9 +1917,12 @@ body.nx-style-plain .cm-editor .cm-formatting { color: color-mix(in srgb, var(--
   margin-top: 8px !important;
   padding: 2px 0 !important;
 }
+/* The rail stays on a phone — it is two pixels and it is the only thing marking
+   where one folder ends. What goes is the outer margin: the full-screen drawer
+   already does the separating. */
 .is-phone.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item) {
-  margin: 0 !important;
+  margin: 0 0 4px !important;
   border-radius: 0 !important;
 }
 

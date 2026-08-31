@@ -2,6 +2,29 @@
 
 Grouped by what changed for you, not by commit. Newest first.
 
+## 0.7.0 — 2026-08-31
+
+### Changed
+
+- **Top-level folders are marked by a rail, not by a filled block.** Picked from
+  four rendered alternatives. A sidebar is short of exactly one thing — width —
+  and a block spends it twice, on its own margin and on its inner padding. A
+  folder is a place rather than a weighted category, and with no coloured field
+  competing, the accent is free for the file you are actually looking at.
+
+  The rail still carries the palette: warm Ember at the top of the list, cooling
+  to Prussian at the foot. The **Intensity** slider now sets how present the rail
+  is rather than how strong a fill is.
+
+- **Hovering a folder** lifts its row and brightens its rail. The inner border
+  is gone — it existed to raise a pill off a filled block, and without the block
+  it read as a box drawn around one line.
+
+### Added
+
+- `docs/style-guide.md`: the binding visual rules, including why the rails won
+  and what the three rejected alternatives cost.
+
 ## 0.6.0 — 2026-08-31
 
 ### Changed
