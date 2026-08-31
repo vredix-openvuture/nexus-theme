@@ -1,47 +1,47 @@
 /* ============================================================================
  *  NEXUS  —  a card-based PKM theme for Obsidian
- *  v0.2.0  ·  mirobo-Sprache + wallust-Farben
+ *  v0.2.0  ·  mirobo shapes + wallust colours
  * ----------------------------------------------------------------------------
- *  Vorbild: der "mirobo"-Style aus velumeron (quickshell) — flat, jedes
- *  UI-Element ist ein eigener, abgerundeter, leicht getönter Chip, der auf
- *  dem "Schreibtisch" (Wallpaper-Farbe) schwebt.
+ *  Modelled on the "mirobo" style from velumeron (quickshell): flat, and every
+ *  UI element is its own rounded, slightly tinted chip floating on the "desk"
+ *  (the wallpaper colour).
  *
- *  In Obsidian bekommt damit JEDES Element seine eigene Card:
- *    Editor-Tableiste · Editor · Explorer-Icons · Explorer · Vault-Wähler
+ *  In Obsidian that gives EVERY element its own card:
+ *    editor tab bar · editor · explorer icons · explorer · vault picker
  *
- *  FARBEN kommen aus wallust:
- *    Das Snippet  wallust-colors.css  liefert --wl-background/-foreground/
- *    -color0..15 (live von wallust überschrieben). Dieses Theme leitet daraus
- *    seine --nx-* Tokens ab. Fallbacks = aktuelle Live-Palette, damit es auch
- *    ohne Snippet funktioniert.
+ *  COLOURS come from wallust:
+ *    The snippet wallust-colors.css provides --wl-background/-foreground/
+ *    -color0..15, overwritten live by wallust. This theme derives its --nx-*
+ *    tokens from those. The fallbacks are the current live palette, so it also
+ *    works without the snippet.
  *
- *  Semantik (identisch zu velumeron Colors.qml):
+ *  Meaning of each slot (identical to velumeron's Colors.qml):
  *    color0 → bgPrimary   color1 → bgElement   color2 → bgSecondary
  *    color3 → ACCENT      color5 → border      color7/fg → text
  *    color8 → muted       color15 → bright
  *
- *  Aufbau:
- *    1. GEOMETRIE  (mirobo-Tokens: Radius, Gap)
- *    2. FARBEN     (wallust → --nx-*)  · Dark
- *    3. FARBEN     · Light
- *    4. OBSIDIAN-CORE-VARIABLEN
+ *  Layout of this file:
+ *    1. GEOMETRY   (mirobo tokens: radius, gap)
+ *    2. COLOURS    (wallust → --nx-*)  · dark
+ *    3. COLOURS    · light
+ *    4. OBSIDIAN CORE VARIABLES
  *    5. DESK / LAYOUT
- *    6. CHIPS      (jedes Element eine Card)
- *    7. EXPLORER   (Feinschliff)
- *    8. TYPOGRAFIE / CONTENT
+ *    6. CHIPS      (every element a card)
+ *    7. EXPLORER   (detail work)
+ *    8. TYPOGRAPHY / CONTENT
  * ========================================================================== */
 
 
 /* ============================================================================
- * 1. GEOMETRIE  —  mirobo-Tokens (hier drehst du am schnellsten)
+ * 1. GEOMETRY  —  mirobo tokens (the fastest thing to turn)
  * ========================================================================== */
 .theme-dark,
 .theme-light {
-  --nx-radius:    15px;   /* EINHEITLICHER Radius für ALLE Chips (cozy: weicher) */
-  --nx-r-tile:    10px;   /* nur für Mini-Elemente (Tabs, Datei-Einträge)    */
-  --nx-gap:       12px;   /* EINHEITLICHER Abstand zwischen allen Chips      */
-  --nx-bar-h:     38px;   /* feste, gleiche Höhe für Tableiste & Icon-Leiste */
-  --nx-tab-gap:   5px;    /* gleicher Abstand der Tabs nach oben & zu den Seiten */
+  --nx-radius:    15px;   /* ONE radius for ALL chips (cozy: softer)         */
+  --nx-r-tile:    10px;   /* only for small elements (tabs, file entries)    */
+  --nx-gap:       12px;   /* ONE gap between all chips                       */
+  --nx-bar-h:     38px;   /* fixed, equal height for the tab bar and icon bar */
+  --nx-tab-gap:   5px;    /* the same gap above the tabs and to the sides */
 
   /* Obsidian-Radien angleichen */
   --radius-s: var(--nx-r-tile);
@@ -51,9 +51,9 @@
   --tab-outline-width: 0;
   --divider-width: 0px;
   --divider-width-hover: 3px;
-  --tab-divider-color: transparent;   /* keine Linie zwischen Tabs */
+  --tab-divider-color: transparent;   /* no line between tabs */
 
-  /* Tabs: rundum abgerundete Pillen (keine harte Browser-Tab-Unterkante) */
+  /* Tabs: pills, rounded all round — not a browser tab's hard bottom edge. */
   --tab-radius: var(--nx-r-tile);
   --tab-radius-active: var(--nx-r-tile);
   --tab-curve: 0px;
@@ -64,62 +64,62 @@
  * 2. FARBEN  —  wallust → --nx-*   ·  DARK
  * ========================================================================== */
 .theme-dark {
-  /* ── Akzent = EXAKT wie velumeron (Colors.qml: bgActive = color3). Das ist
-        der Slot, den deine Bar/rofi für aktiv/selektiert nutzen → Obsidian
-        matcht die Bar. Bei diesem Wallpaper ist color3 blau; ändert sich mit
-        dem Wallpaper. Nicht willkürlich tauschen. ── */
-  --nx-accent:     var(--wl-color3, #4E68AB);   /* roh: für Tönung/Border/Desk/aktiv
-     (COZY: unten per @supports oklch entsättigt → pastellig statt neon) */
+  /* ── The accent is EXACTLY velumeron's (Colors.qml: bgActive = color3). That
+        is the slot your bar and rofi use for active/selected, so Obsidian
+        matches the bar. With this wallpaper color3 is blue; it changes with the
+        wallpaper. Do not swap it for something arbitrary. ── */
+  --nx-accent:     var(--wl-color3, #4E68AB);   /* raw: for tint, border, desk and active states
+     (COZY: desaturated below via @supports oklch → pastel instead of neon) */
 
-  /* ── KONTRAST-SCHUTZ ── Prinzip für garantierte Lesbarkeit bei JEDER Palette:
-     1. Flächen bleiben NAH an color0 und werden nur leicht angehoben — COZY: mit
-        einem warmen CREME (--nx-warm) statt reinem Weiß → warmes Dunkel, kein
-        kühles Grau, aber weiterhin NEUTRAL (nicht mit dem Akzent geflutet).
-     2. Text = warmes Off-White (fixe Tönung, hoher Kontrast → lesbar).
-     3. Akzent-als-Text (Überschriften/Links) wird HELLER gezogen (--nx-accent-fg).
-     --nx-guard = wie stark die Flächen angehoben werden. */
-  /* PALETTE-TREU (wie velumeron): KEIN Warm-Braun mehr einmischen. Flächen
-     folgen color0. Nur ein NEUTRALER Lift (Weiß) hebt die Karten leicht an. */
+  /* ── CONTRAST GUARD ── How legibility is guaranteed on ANY palette:
+     1. Surfaces stay CLOSE to color0 and are lifted only slightly — COZY: with a
+        warm cream (--nx-warm) rather than pure white → warm dark instead of cool
+        grey, but still NEUTRAL (not flooded with the accent).
+     2. Text is a warm off-white (fixed tint, high contrast, so it reads).
+     3. The accent AS TEXT (headings, links) is pulled lighter (--nx-accent-fg).
+     --nx-guard = how strongly the surfaces are lifted. */
+  /* TRUE TO THE PALETTE (like velumeron): no warm brown mixed in any more.
+     Surfaces follow color0. Only a NEUTRAL lift (white) raises the cards. */
   --nx-guard:      11%;   /* Karten deutlicher vom Schreibtisch abheben (war 7% → wirkte verwaschen) */
-  --nx-warm:       #f8ead2;   /* nur noch als sanfter Lift-Ton (kaum genutzt) */
-  --nx-warm-dark:  #2a1d14;   /* Legacy-Var (für styles.css-Fallbacks), nicht mehr in Flächen */
+  --nx-warm:       #f8ead2;   /* only as a soft lift tone now (barely used) */
+  --nx-warm-dark:  #2a1d14;   /* Legacy var (for styles.css fallbacks), no longer used on surfaces */
   --nx-ember:      #e0a465;   /* Legacy-Var */
   /* Karten = color0 + neutraler Lift (≈ velumeron bgElement/color1) */
   --nx-floor:      color-mix(in srgb, #ffffff var(--nx-guard), var(--wl-color0, #080409));
 
-  /* Schreibtisch = color0 (= velumeron bgPrimary), nur ein Hauch Akzent. */
+  /* Desk = color0 (velumeron's bgPrimary), with only a hint of accent. */
   --nx-desk:       color-mix(in srgb, var(--nx-accent) 5%, var(--wl-color0, #080409));
-  /* Cards = warmer Floor + nur ein HAUCH Akzent (kein Farbfeld) */
+  /* Cards = warm floor plus only a HINT of accent (not a colour field) */
   --nx-chip:       color-mix(in srgb, var(--nx-accent) 4%,  var(--nx-floor)); /* Editor          */
   --nx-chip-side:  color-mix(in srgb, var(--nx-accent) 8%,  var(--nx-floor)); /* Leisten/Sidebar */
-  --nx-elevated:   color-mix(in srgb, var(--nx-accent) 13%, var(--nx-floor)); /* Menüs/Inputs    */
+  --nx-elevated:   color-mix(in srgb, var(--nx-accent) 13%, var(--nx-floor)); /* menus and inputs */
 
-  /* Linien & Text — mehr Definition (die dezenten Ränder ließen alles verwaschen). */
-  /* Border = color5-Tönung ÜBER einem neutralen Weiß-Hauch. Der Weiß-Anteil gibt
-     die Helligkeit, die die Kante auf JEDER Palette sichtbar macht — ein reines
-     color5 (z.B. Rosa bei Indigo&Rose) hat auf dunklen Karten zu wenig Kontrast
-     und wirkte randlos. color5 bleibt als Farbton drin. */
+  /* Lines and text — more definition (the subtle borders left everything washed out). */
+  /* Border = a color5 tint OVER a neutral hint of white. The white gives it the
+     brightness that makes the edge visible on EVERY palette — a pure color5
+     (pink on Indigo & Rose, say) has too little contrast on dark cards and read
+     as no border at all. color5 stays in it as the hue. */
   --nx-border:     color-mix(in srgb, var(--wl-color5, #C95E61) 30%, color-mix(in srgb, #ffffff 16%, transparent));
   /* TEXT = warmes Off-White, hoher Kontrast auf color0. */
   --nx-fg:         color-mix(in srgb, var(--wl-foreground, #A7E2A6) 38%, #ffffff);
-  /* Sekundärtext: aus dem echten Fließtext abgedimmt (nicht mehr aus dem grauen
-     color8) → klar lesbar statt hazy. */
+  /* Secondary text: dimmed down from the real body text, not taken from the grey
+     color8 → clearly legible instead of hazy. */
   --nx-fg-muted:   color-mix(in srgb, var(--nx-fg) 64%, var(--wl-color0, #0B0402));
   --nx-fg-bright:  var(--wl-color15, #C4E1C3);
-  /* Akzent als Textfarbe (Links/aktiv) = Akzent Richtung Fließtext gemischt
-     (statt reinem Weiß) → gedämpfter, fügt sich besser ein. */
+  /* The accent as a text colour (links, active) = the accent mixed toward the body
+     text rather than toward pure white → calmer, and it sits better in a line. */
   --nx-accent-fg:  color-mix(in srgb, var(--nx-accent) 66%, var(--nx-fg));
   --nx-on-accent:  var(--nx-fg-bright);
 
-  /* FLAT: keine Schatten — Trennung über Ton & dezente Ränder */
+  /* FLAT: no shadows — separation comes from tone and quiet borders */
   --nx-chip-shadow: none;
 
   color-scheme: dark;
 }
 
-/* Akzent = roher Palette-Slot color3 (NICHT entsättigt) → echtes Palette-Lila
-   wie in der velumeron-Bar/Referenz-App. color3 ist von Haus aus gedämpft, also
-   nie neon; ein Hauch Chroma-Boost gibt ihm etwas mehr Leben. */
+/* The accent is the raw palette slot color3, NOT desaturated → the real palette
+   purple, as in the velumeron bar and the reference app. color3 is muted to
+   begin with, so it is never neon; a hint of chroma boost gives it some life. */
 @supports (color: oklch(from white l c h)) {
   .theme-dark {
     --nx-accent: oklch(from var(--wl-color3, #443A67) l calc(c * 1.35) h);
@@ -128,37 +128,37 @@
 
 
 /* ============================================================================
- * 3. FARBEN  —  ·  LIGHT   (gespiegeltes „Verfahren" zum Dark-Mode)
- *    wallust läuft dark → im Light-Mode NICHT color0 hochziehen (würde muddy),
- *    sondern eine PAPIER-Basis nehmen und neutral ABDUNKELN. Akzent bleibt aus
- *    wallust (matcht Bar/rofi). Gleiche Token-Struktur wie Dark, damit die
- *    Kern-Variablen (Abschnitt 4) unverändert daraus ableiten.
+ * 3. COLOURS  —  ·  LIGHT   (the dark-mode method, mirrored)
+ *    wallust runs dark, so in light mode color0 is NOT pulled up (that goes
+ *    muddy). A PAPER base is taken instead and darkened neutrally. The accent
+ *    still comes from wallust, so it matches the bar and rofi. Same token
+ *    structure as dark, so the core variables in section 4 derive unchanged.
  * ========================================================================== */
 .theme-light {
-  /* Akzent = EXAKT wie Dark (wallust color3). Roh für Border/Tönung. */
+  /* Accent EXACTLY as in dark (wallust color3). Raw, for borders and tints. */
   --nx-accent:     var(--wl-color3, #4E68AB);
 
-  /* ── FLÄCHEN-AKZENT ──
-     wallust liefert oft entsättigte Slots. Früher stark aufgesättigt (×1.9) →
-     das wirkte knallig/futuristisch. COZY: nur mild anheben (unten ×1.2) →
-     pastellig. Default = roher Akzent, falls oklch fehlt. */
+  /* ── SURFACE ACCENT ──
+     wallust often hands over desaturated slots. These used to be saturated hard
+     (x1.9), which read as loud and futuristic. COZY: lift only mildly (x1.2
+     below) → pastel. The default is the raw accent, in case oklch is missing. */
   --nx-accent-vivid: var(--nx-accent);
 
-  /* ── KONTRAST-SCHUTZ (Spiegel zu Dark) ──
-     Dark hebt color0 mit warmem Creme an; Light senkt warmes PAPIER mit einem
-     warmen Dunkel ab (nicht reinem Schwarz → nie kühl/grau). */
+  /* ── CONTRAST GUARD (the mirror of dark) ──
+     Dark lifts color0 with a warm cream; light lowers warm PAPER with a warm
+     dark — not pure black, so it never turns cool or grey. */
   --nx-guard:      5%;
   --nx-paper:      #f4ede1;                                                          /* warmes Creme-Papier */
   --nx-floor:      color-mix(in srgb, #2a2018 var(--nx-guard), var(--nx-paper));     /* warm abgesenkt */
 
-  /* ── FARB-STÄRKE der Light-Flächen ── COZY: deutlich zurückgenommen. */
+  /* ── COLOUR STRENGTH of the light surfaces ── COZY: pulled back a long way. */
   --nx-desk:       color-mix(in srgb, var(--nx-accent-vivid) 26%,
-                     color-mix(in srgb, #2a2018 6%, var(--nx-paper)));   /* Fläche hinter den Cards: sanft */
+                     color-mix(in srgb, #2a2018 6%, var(--nx-paper)));   /* The surface behind the cards: gentle */
   --nx-chip:       color-mix(in srgb, var(--nx-accent-vivid) 11%, var(--nx-paper));   /* Editor          */
   --nx-chip-side:  color-mix(in srgb, var(--nx-accent-vivid) 22%, var(--nx-floor));   /* Leisten/Sidebar */
-  --nx-elevated:   color-mix(in srgb, var(--nx-accent-vivid) 8%,  var(--nx-paper));   /* Menüs/Inputs    */
+  --nx-elevated:   color-mix(in srgb, var(--nx-accent-vivid) 8%,  var(--nx-paper));   /* menus and inputs */
 
-  /* Linien & Text — warm, Ränder dezent. */
+  /* Lines and text — warm, with quiet borders. */
   --nx-border:     color-mix(in srgb, var(--nx-accent-vivid) 30%, #d8cebd);
   --nx-fg:         #3a332c;   /* warmes Dunkelbraun-Grau */
   --nx-fg-muted:   #857c70;
@@ -166,14 +166,15 @@
   --nx-accent-fg:  color-mix(in srgb, var(--nx-accent-vivid) 62%, #201a12);
   --nx-on-accent:  #faf5ec;
 
-  /* FLAT: keine Schatten */
+  /* FLAT: no shadows */
   --nx-chip-shadow: none;
 
   color-scheme: light;
 }
 
-/* COZY-FILTER (Light): Akzent nur MILD anheben (×1.2) → pastellig statt knallig.
-   Nur wenn oklch-Relativfarben unterstützt werden; sonst roher Akzent. */
+/* COZY filter (light): lift the accent only MILDLY (x1.2) → pastel rather than
+   loud. Only where relative oklch colours are supported; otherwise the raw
+   accent. */
 @supports (color: oklch(from white l c h)) {
   .theme-light {
     --nx-accent-vivid: oklch(from var(--nx-accent) calc(l * 0.96 + 0.02) calc(c * 1.2) h);
@@ -186,13 +187,13 @@
  * ========================================================================== */
 .theme-dark,
 .theme-light {
-  /* Akzent als TEXT (Überschriften/Links/Fett – auch via deine Snippets) nutzt
-     die hellere, lesbare Variante. Für farbige FLÄCHEN (Desk/Tönung/aktiv/Border)
-     greift das Theme direkt auf das rohe var(--nx-accent) zu. */
-  /* Highlight-Wash für ==Text== — aus dem Paletten-Akzent abgeleitet, damit die
-     Marker-Farbe mit dem Wallpaper/Wallust mitwandert (roh var(--nx-accent), nicht
-     die hellere Text-Variante, weil es eine FLÄCHE ist). Der Marker-Strich selbst
-     (schräge Enden, kein Chip) bleibt in Abschnitt 8 definiert. */
+  /* The accent as TEXT (headings, links, bold — including via your own snippets)
+     uses the lighter, legible variant. For coloured SURFACES (desk, tint, active,
+     border) the theme reaches for the raw var(--nx-accent) directly. */
+  /* Highlight wash for ==text== — derived from the palette accent, so the marker
+     colour travels with the wallpaper and wallust. The raw var(--nx-accent), not
+     the lighter text variant, because this is a SURFACE. The marker stroke itself
+     (slanted ends, not a chip) is defined in section 8. */
   --nx-mark: color-mix(in srgb, var(--nx-accent) 38%, transparent);
 
   --interactive-accent:      var(--nx-accent-fg);
@@ -228,7 +229,7 @@
 
 
 /* ============================================================================
- * 5. DESK / LAYOUT  —  der Schreibtisch hinter den Chips
+ * 5. DESK / LAYOUT  —  the desk behind the chips
  * ========================================================================== */
 
 .workspace,
@@ -242,34 +243,34 @@ body {
 .titlebar,
 .status-bar { border: none !important; }
 
-/* Splitter unsichtbar – die Gaps trennen */
+/* Splitters invisible — the gaps do the separating */
 .workspace-leaf-resize-handle,
 .workspace-split > hr { background: transparent !important; }
 
-/* Gleichmäßige Außenabstände: Container liefert die halbe Lücke,
-   jeder Chip die andere Hälfte (siehe Abschnitt 6). */
+/* Even outer spacing: the container provides half the gap and each chip the
+   other half (see section 6). */
 .horizontal-main-container {
   padding: calc(var(--nx-gap) / 2);
 }
 
 
 /* ============================================================================
- * 6. CARDS  —  jede Spalte EINE Card; die Leiste ist Teil ihrer Card (mirobo)
+ * 6. CARDS  —  one card per column; the bar is part of its card (mirobo)
  * ----------------------------------------------------------------------------
- *  Card = .workspace-tabs (enthält Leiste + Inhalt). Die Leiste
- *  (.workspace-tab-header-container) sitzt als oberer Streifen IN der Card,
- *  nur durch eine Trennlinie abgesetzt — kein eigener Chip.
+ *  Card = .workspace-tabs (holds the bar and the content). The bar
+ *  (.workspace-tab-header-container) sits as a strip INSIDE the card, set off
+ *  only by a dividing line — not as a chip of its own.
  *
- *   Editor  :  Card = .mod-root .workspace-tabs        (Tableiste + Editor)
- *   Sidebar :  Card = .mod-*-split .workspace-tabs      (Icon-Leiste + Explorer)
- *   Vault   :  eigene Card = .workspace-sidedock-vault-profile
+ *   Editor  :  card = .mod-root .workspace-tabs       (tab bar + editor)
+ *   Sidebar :  card = .mod-*-split .workspace-tabs    (icon bar + explorer)
+ *   Vault   :  its own card = .workspace-sidedock-vault-profile
  * ========================================================================== */
 
-/* 6a. Tiefere Wrapper + .workspace-tabs neutralisieren. Die Card entsteht aus
-       Leiste + Inhalt, die zu EINER Card verbunden werden (6b).
-       WICHTIG: Cards liegen auf tab-header-container/tab-container, weil DEREN
-       Ränder zuverlässig greifen — die Ränder von .workspace-tabs tun das NICHT
-       (absolut positioniert → Editor/Explorer klebten aneinander). */
+/* 6a. Neutralise the deeper wrappers and .workspace-tabs. The card is made of
+       the bar plus the content, joined into ONE card in 6b.
+       IMPORTANT: the cards sit on tab-header-container / tab-container, because
+       THOSE borders take reliably — the borders of .workspace-tabs do NOT
+       (absolutely positioned → editor and explorer ended up stuck together). */
 .workspace-split,
 .mod-root,
 .mod-left-split,
@@ -290,9 +291,9 @@ body {
   border: none !important;
 }
 
-/* 6b. CARD = Leiste + Inhalt, optisch zu EINER Card verbunden: gleiche Farbe &
-       Rand, dazwischen KEIN Spalt (Leiste unten flach, Inhalt oben flach),
-       nur eine Trennlinie. */
+/* 6b. CARD = bar plus content, visually joined into ONE: same colour and border,
+       NO gap between them (the bar flat at the bottom, the content flat at the
+       top), only a dividing line. */
 .workspace-tab-header-container,
 .workspace-tab-container {
   border: 1px solid var(--nx-border) !important;
@@ -302,10 +303,10 @@ body {
 .mod-left-split .workspace-tab-container,
 .mod-right-split .workspace-tab-header-container,
 .mod-right-split .workspace-tab-container {
-  background-color: var(--nx-chip-side) !important;     /* Sidebar kräftiger */
+  background-color: var(--nx-chip-side) !important;     /* sidebar stronger */
 }
 
-/* Leiste = obere Hälfte der Card (oben rund, unten flach + Trennlinie) */
+/* Bar = the top half of the card (round on top, flat below plus a divider) */
 .workspace-tab-header-container {
   height: var(--nx-bar-h) !important;
   min-height: var(--nx-bar-h) !important;
@@ -314,10 +315,10 @@ body {
   display: flex !important;
   align-items: center !important;
   border-radius: var(--nx-radius) var(--nx-radius) 0 0 !important;
-  border-bottom: none !important;   /* keine Trennlinie – nahtlos zur Card */
+  border-bottom: none !important;   /* no divider — seamless into the card */
 }
 
-/* Inhalt = untere Hälfte der Card (oben flach & randlos, unten rund) */
+/* Content = the bottom half of the card (flat and borderless on top, round below) */
 .workspace-tab-container {
   margin: 0 calc(var(--nx-gap) / 2) calc(var(--nx-gap) / 2) !important;
   border-top: none !important;
@@ -326,12 +327,12 @@ body {
 }
 .workspace-tab-header-container-inner {
   align-items: center;
-  gap: var(--nx-tab-gap);            /* gleicher Abstand zwischen den Tabs */
+  gap: var(--nx-tab-gap);            /* the same gap between the tabs */
   background: transparent !important;
 }
 
-/* Tabs = runde Pillen mit SOLIDEM Hintergrund (nicht transparent → kein
-   Durchscheinen des Banners), gleichmäßig eingerückt. */
+/* Tabs = round pills with a SOLID background — not transparent, or the banner
+   shows through — and evenly inset. */
 .workspace-tab-header {
   border-radius: var(--nx-r-tile) !important;
   margin: 0 !important;
@@ -340,7 +341,7 @@ body {
 }
 .workspace-tab-header::before,
 .workspace-tab-header::after { display: none !important; }
-/* Keine Trennlinie zwischen den Tabs (Rand/Schatten/Divider-Variable killen) */
+/* No divider between the tabs (kill the border, shadow and divider variable) */
 .workspace-tab-header,
 .workspace-tab-header-inner {
   border: none !important;
@@ -354,7 +355,7 @@ body {
   color: var(--nx-fg-bright);
 }
 
-/* Ribbon (linke Icon-Leiste): normale Card wie die anderen Chips. */
+/* Ribbon (the icon bar on the left): an ordinary card like the other chips. */
 .workspace-ribbon.mod-left,
 .side-dock-ribbon.mod-left {
   background-color: var(--nx-chip-side) !important;
@@ -364,8 +365,8 @@ body {
   padding: 6px 0 !important;
   box-shadow: var(--nx-chip-shadow) !important;
 }
-/* Kein „Blindfleck" oben: das leere ::before-Pseudo (44×40) + der Collapse-
-   Button-Bereich raus, Icons starten direkt oben. */
+/* No "blind spot" at the top: the empty ::before pseudo-element (44x40) and the
+   collapse-button area are removed, so the icons start right at the top. */
 .workspace-ribbon.mod-left::before,
 .side-dock-ribbon.mod-left::before {
   display: none !important;
@@ -378,7 +379,7 @@ body {
 .workspace-ribbon.mod-left .side-dock-actions,
 .workspace-ribbon.mod-left .side-dock-ribbon-actions {
   margin-top: 0 !important;
-  padding: 0 !important;                 /* kein Leerraum links/rechts */
+  padding: 0 !important;                 /* no empty space left or right */
   align-items: center !important;        /* Icons mittig, symmetrisch */
 }
 .workspace-ribbon.mod-left .side-dock-actions .clickable-icon,
@@ -387,10 +388,10 @@ body {
   margin-right: 0 !important;
 }
 
-/* (Ribbon-Sichtbarkeit hover/hidden liegt jetzt in der Plugin-styles.css, damit
-   Body-Klasse UND Regel aus EINEM Plugin-Reload kommen.) */
+/* (Ribbon visibility, hover and hidden, now lives in the plugin's styles.css, so
+   the body class AND the rule arrive from ONE plugin reload.) */
 
-/* Vault-Wähler: eigene Card unter der Sidebar-Card (im Sidebar-Flow) */
+/* Vault picker: its own card below the sidebar card, in the sidebar flow */
 .workspace-sidedock-vault-profile {
   position: relative !important;
   box-sizing: border-box !important;
@@ -404,13 +405,13 @@ body {
   overflow: hidden !important;
 }
 
-/* View-Header nicht doppelt rahmen */
+/* Do not frame the view header twice */
 .view-header {
   background: transparent !important;
   border: none !important;
 }
 
-/* Popover / Menüs / Prompts im selben Chip-Look */
+/* Popovers, menus and prompts in the same chip look */
 .menu,
 .suggestion-container,
 .prompt,
@@ -421,9 +422,9 @@ body {
   background-color: var(--nx-elevated);
 }
 
-/* Inline-Tags — KONTRAST-SCHUTZ: immer dunkle Akzent-Pille + heller Text,
-   egal wie hell die wallust-Palette ist. Höhere Spezifität als das
-   style.css-Snippet (.cm-hashtag → --interactive-accent), damit es greift. */
+/* Inline tags — CONTRAST GUARD: always a dark accent pill with light text, no
+   matter how bright the wallust palette is. Higher specificity than the
+   style.css snippet (.cm-hashtag → --interactive-accent), so it takes. */
 .markdown-source-view.mod-cm6 .cm-hashtag,
 .markdown-rendered a.tag {
   background-color: color-mix(in srgb, var(--nx-accent) 22%, var(--nx-chip)) !important;
@@ -436,12 +437,12 @@ body {
 
 
 /* ============================================================================
- * 7. EXPLORER  —  Feinschliff Datei-Baum  (früher: explorer.css)
+ * 7. EXPLORER  —  detail work on the file tree  (was: explorer.css)
  * ========================================================================== */
 
 .nav-files-container {
   padding: 6px 4px;
-  margin-top: 20px !important;   /* Abstand unter der Icon-/Kopfleiste */
+  margin-top: 20px !important;   /* gap below the icon and header bar */
 }
 
 .nav-file-title,
@@ -457,7 +458,7 @@ body {
   background-color: var(--background-modifier-hover) !important;
 }
 
-/* Top-Level-Ordner: luftiger, gesperrte Schrift als Abschnitts-Titel */
+/* Top-level folders: airier, letter-spaced, as section titles */
 .nav-files-container .tree-item:not(.tree-item .tree-item)
   > .nav-folder-title .nav-folder-title-content {
   letter-spacing: 1px !important;
@@ -474,28 +475,31 @@ div[data-path*='scribbles'] + div.nav-folder-children {
   color: var(--interactive-accent);
 }
 
-/* Ordnername beim Hover akzentuieren */
+/* Accent the folder name on hover */
 .nav-folder-title-content:hover {
   color: var(--interactive-accent) !important;
 }
 
-/* ── Haupt-Ordner als getönte BLÖCKE, deren Ton einem vertikalen Theme-Verlauf
-   folgt (oben kräftig → unten dezent) ── (Body-Klasse vom Nexus-Suite-Plugin).
-   Die Farbe sitzt auf dem GANZEN Ordner-Block (.tree-item.nav-folder), also
-   inkl. .nav-folder-children → ausgeklappte Kinder liegen im selben Block wie
-   ihr Parent. Jeder Block bekommt seinen Ton nach Position (--i), sodass ein
-   Verlauf von oben nach unten entsteht (getrennte Blöcke wie im Referenzbild).
-   --i wird per :nth-child gesetzt; Spacer/Dateien überspringen Nummern, die
-   Reihenfolge bleibt monoton → wirkt immer wie ein Verlauf.
-   Regler: --nx-fld-intensity (Plugin-Slider) = Grundstärke des obersten Blocks. */
+/* ── Top-level folders as tinted BLOCKS whose tone follows a vertical gradient
+   down the theme (strong at the top, quiet at the bottom) ── (body class from
+   the Nexus Suite plugin).
+   The colour sits on the WHOLE folder block (.tree-item.nav-folder), children
+   included, so an expanded folder's contents live in the same block as their
+   parent. Each block takes its tone from its position (--i), which produces a
+   gradient down the list — separate blocks, as in the reference picture.
+   --i is set with :nth-child; spacers and files skip numbers, but the order
+   stays monotonic, so it always reads as a gradient.
+   The control is --nx-fld-intensity (a plugin slider) = the base strength of
+   the topmost block. */
 body.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item) {
   --i: 6;
-  /* Ember → Prussian: jeder Block bekommt einen Ember-Grundton nach Position
-     (--i, oben in der Liste am kräftigsten), PLUS einen vertikalen Verlauf, der
-     zum Fuß hin ins kühle Prussian (--wl-color5) kippt — und je weiter unten der
-     Ordner steht, desto mehr Prussian (Verlauf über die ganze Liste, warm→kühl). */
-  --fld-acc:  clamp(4%, calc(var(--nx-fld-intensity, 22%) + 36%), 82%);   /* einheitlich für ALLE Ordner (kein Positions-Sweep) */
+  /* Ember → Prussian: each block takes an Ember base tone from its position
+     (--i, strongest at the top of the list), PLUS a vertical gradient that tips
+     toward the cool Prussian (--wl-color5) at its foot — and the further down
+     the folder sits, the more Prussian it gets (a gradient over the whole list,
+     warm to cool). */
+  --fld-acc:  clamp(4%, calc(var(--nx-fld-intensity, 22%) + 36%), 82%);   /* the same for ALL folders (no positional sweep) */
   --fld-tint: color-mix(in srgb, var(--wl-color5, #1b3854) var(--fld-acc), var(--nx-chip-side));   /* Prussian-Blau als Grundton */
   margin: 4px 10px;
   padding: 2px;
@@ -522,16 +526,16 @@ body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-it
 body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(15) { --i: 14; }
 body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(16) { --i: 15; }
 
-/* Parent-Titel: transparent (der Block trägt die Farbe), Kopf des Blocks.
-   Flexbox, damit der Klapp-Pfeil MIT in den Balken kommt (Obsidian setzt ihn
-   sonst links außerhalb des Paddings). */
+/* Parent title: transparent, because the block carries the colour. It is the
+   head of the block. Flexbox, so the collapse arrow comes INTO the bar —
+   Obsidian otherwise puts it to the left, outside the padding. */
 body.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item) > .tree-item-self.nav-folder-title {
   display: flex !important;
   align-items: center !important;
   gap: 4px;
   margin: 0;
-  min-height: 0 !important;   /* Obsidians erzwungene Höhe weg → Titel wrappt Inhalt */
+  min-height: 0 !important;   /* drop Obsidian's forced height → the title wraps its content */
   height: auto !important;
   padding: 3px 10px;
   border-radius: var(--nx-r-tile);
@@ -541,7 +545,7 @@ body.nx-explorer-folders .nav-files-container
   line-height: 1.4;
 }
 
-/* ALLE Kinder des Titels vertikal zentrieren (Icon UND Text), Versatz raus */
+/* Centre ALL children of the title vertically (icon AND text), no offset */
 body.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item)
   > .tree-item-self.nav-folder-title > * {
@@ -550,14 +554,14 @@ body.nx-explorer-folders .nav-files-container
   margin-bottom: 0 !important;
 }
 
-/* Klapp-Pfeil in den Balken holen (statt links im Gutter) */
+/* Pull the collapse arrow into the bar, instead of leaving it in the gutter */
 body.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item)
   > .tree-item-self.nav-folder-title > .tree-item-icon.collapse-icon {
   position: static !important;
   margin: 0 !important;
   padding: 0 !important;
-  order: -1;                 /* immer ganz links im Balken */
+  order: -1;                 /* always hard left in the bar */
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -571,8 +575,8 @@ body.nx-explorer-folders .nav-files-container
   margin: 0;
 }
 
-/* Ausgeklappte Kinder liegen im selben Block → transparent, damit die Block-
-   Tönung durchscheint; Text gut lesbar halten. */
+/* Expanded children live in the same block → transparent, so the block tint
+   shows through; keep the text properly legible. */
 body.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item) .nav-folder-children {
   background: transparent;
@@ -582,10 +586,10 @@ body.nx-explorer-folders .nav-files-container
   color: var(--nx-fg-bright);
 }
 
-/* Hover auf der Ordner-Titelzeile: sanfter, halbtransparenter Lift statt des
-   generischen grauen --background-modifier-hover-Kastens (Zeile ~456). Die
-   Block-Tönung scheint durch, ein zarter heller Innenrand hebt die Pill an, die
-   Schrift bleibt cremig hell (nicht das grelle Orange von Zeile ~478). */
+/* Hover on a folder title row: a soft, half-transparent lift instead of the
+   generic grey --background-modifier-hover box (around line 456). The block
+   tint shows through, a faint light inner border raises the pill, and the text
+   stays creamy rather than the loud orange from around line 478. */
 body.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item)
   > .tree-item-self.nav-folder-title:hover {
@@ -609,11 +613,12 @@ body.nx-explorer-folders .nav-files-container
   --line-height-normal: 1.7;
 }
 
-/* ── Überschriften-STAFFELUNG (Reading View) ──────────────────────────────
-   Kein Balken/keine Linie: die Hierarchie entsteht rein aus FARBE + GEWICHT.
-   H1/H2 voll im Akzent, H3 zieht Richtung Text, H4 fällt auf helles Fließ-
-   text-Weiß ab, H5/H6 werden zu ruhigen, gesperrten Labels. Alle Werte aus
-   dem Paletten-System (--nx-*), also palettentreu bei jedem Wallpaper. */
+/* ── HEADING LADDER (reading view) ─────────────────────────────────────────
+   No bar and no rule: the hierarchy comes purely from COLOUR and WEIGHT.
+   H1 and H2 sit in the full accent, H3 pulls toward the text colour, H4 falls
+   to the light body-text white, and H5/H6 become quiet, letter-spaced labels.
+   Every value comes from the palette system (--nx-*), so it stays true to the
+   palette under any wallpaper. */
 .markdown-rendered {
   --h1-color: var(--nx-accent-fg);
   --h2-color: var(--nx-accent-fg);
@@ -629,17 +634,18 @@ body.nx-explorer-folders .nav-files-container
   --h5-weight: 600;
   --h6-weight: 600;
 }
-/* H5/H6 als gesperrte Labels — das trennt sie klar von H4/Fließtext, obwohl
-   sie kaum größer sind. H6 zusätzlich in Versalien (Serif-„Kicker"). */
+/* H5 and H6 as letter-spaced labels — that separates them clearly from H4 and
+   body text even though they are barely larger. H6 also goes to small caps,
+   a serif "kicker". */
 .markdown-rendered h5 { letter-spacing: .03em; }
 .markdown-rendered h6 { letter-spacing: .08em; text-transform: uppercase; }
 
-/* ── Highlight (==Text==) als echter TEXTMARKER-Strich ──
-   Bewusst KEINE Pillen-Rundung/Padding-Box (sonst sieht es aus wie ein Tag-Chip).
-   Der Gradient bei 105° erzeugt flach-schräge Marker-Enden und liegt eng am Text
-   → liest sich wie ein Filzstift-Strich, nicht wie ein Chip. box-decoration-break
-   sorgt dafür, dass auch umbrechende Highlights durchgezogen aussehen.
-   Gilt Reading + Live-Preview. */
+/* ── Highlight (==text==) as a real MARKER PEN stroke ──
+   Deliberately NO pill rounding and no padding box, or it looks like a tag chip.
+   The gradient at 105° gives the stroke flat, slanted ends and sits close to the
+   text → it reads as a felt-tip stroke rather than a chip. box-decoration-break
+   keeps a highlight that wraps looking like one continuous stroke.
+   Applies in reading view and in live preview. */
 .markdown-rendered mark,
 .cm-editor .cm-highlight {
   background: linear-gradient(105deg,
@@ -659,7 +665,7 @@ body.nx-explorer-folders .nav-files-container
 .markdown-rendered ol > li::marker { color: var(--nx-accent-fg); font-weight: 600; }
 .cm-editor .cm-formatting-list     { color: var(--nx-accent-fg); }
 
-/* ── Horizontale Trenner als weicher Akzent-Verlauf statt harter Linie ── */
+/* ── Horizontal rules as a soft accent gradient instead of a hard line ── */
 .markdown-rendered hr {
   border: none;
   height: 2px;
@@ -669,7 +675,7 @@ body.nx-explorer-folders .nav-files-container
     transparent);
 }
 
-/* ── Fußnoten-Referenzen als kleine Akzent-Chips statt roher Superscript ── */
+/* ── Footnote references as small accent chips instead of raw superscript ── */
 .markdown-rendered sup.footnote-ref a,
 .markdown-rendered .footnote-ref a {
   background: color-mix(in srgb, var(--nx-accent) 14%, transparent);
@@ -678,7 +684,7 @@ body.nx-explorer-folders .nav-files-container
   text-decoration: none;
 }
 
-/* Inline-Code & Codeblöcke */
+/* Inline code and code blocks */
 :not(pre) > code {
   background-color: color-mix(in srgb, var(--nx-accent) 12%, var(--nx-chip-side));
   border-radius: var(--nx-r-tile);
@@ -689,9 +695,9 @@ body.nx-explorer-folders .nav-files-container
   border-radius: var(--nx-radius);
 }
 
-/* Blockquotes: Akzent-Balken + zarter Tint, kursiv & gedämpft → sofort als
-   Zitat erkennbar, ohne laut zu sein. Tint/Padding nur im Reading View, damit
-   der Live-Preview-Editor (Zeilen-Layout) nicht springt. */
+/* Blockquotes: an accent bar plus a faint tint, italic and muted → recognisable
+   as a quotation at once without being loud. The tint and padding apply in
+   reading view only, so the live-preview editor's line layout does not jump. */
 .markdown-rendered blockquote,
 .cm-editor .cm-blockquote {
   border-left: 3px solid var(--nx-accent);
@@ -704,8 +710,8 @@ body.nx-explorer-folders .nav-files-container
   font-style: italic;
 }
 
-/* Tabellen: sauber abgerundet, ohne dass die Ecken den Rahmen abschneiden.
-   Rahmen liegt auf der TABELLE, die Zellen tragen nur die inneren Linien. */
+/* Tables: cleanly rounded, without the corners cutting off the frame. The frame
+   sits on the TABLE; the cells carry only the inner lines. */
 .markdown-rendered table {
   border-collapse: separate;
   border-spacing: 0;
@@ -726,8 +732,8 @@ body.nx-explorer-folders .nav-files-container
   background-color: color-mix(in srgb, var(--nx-accent) 10%, var(--nx-chip-side));
 }
 
-/* Falls eine Tabelle breiter als der Editor ist: horizontal scrollen
-   statt abschneiden. */
+/* If a table is wider than the editor: scroll horizontally rather than cut it
+   off. */
 .markdown-rendered .table-wrapper,
 .markdown-source-view .table-wrapper {
   overflow-x: auto;
@@ -735,14 +741,14 @@ body.nx-explorer-folders .nav-files-container
 
 
 /* ============================================================================
- * 9. GLOBALE UI/EDITOR-DETAILS   (früher: style.css)
+ * 9. GLOBAL UI AND EDITOR DETAILS   (was: style.css)
  * ----------------------------------------------------------------------------
- *  Chrome ausblenden, Überschriften/Fett/Einzugslinien/Zeilennummern in Akzent.
- *  (Die Hashtag-FLÄCHE regelt Abschnitt 6 mit höherer Spezifität — hier nur die
- *   Rand-Korrektur der Hashtag-Segmente.)
+ *  Hide chrome; headings, bold, indent guides and line numbers in the accent.
+ *  (The hashtag SURFACE is handled in section 6 with higher specificity — what
+ *   is here is only the border correction for the hashtag segments.)
  * ========================================================================== */
 
-/* 9a. Nicht benötigtes Chrome ausblenden */
+/* 9a. Hide the chrome that is not needed */
 .sidebar-toggle-button.mod-left,
 .sidebar-toggle-button.mod-right,
 .workspace-tab-header-tab-list,
@@ -752,16 +758,16 @@ body.nx-explorer-folders .nav-files-container
   display: none !important;
 }
 
-/* 9b. Hashtag-Segmente ohne Innentrennung (Fläche/Farbe kommt aus Abschnitt 6) */
+/* 9b. Hashtag segments with no inner divisions (surface and colour from section 6) */
 .cm-hashtag-begin { border-right: none !important; }
 .cm-hashtag-end   { border-left:  none !important; }
 
-/* 9c. Überschriften im Live-Preview — gleiche FARB-/GEWICHT-Staffelung wie im
-   Reading View (Abschnitt 8). Das aktive Snippet `style.css` färbt via
-   `.theme-* .cm-editor .cm-content .cm-header{,-1,-2,-3} !important` ALLE Header
-   auf eine Farbe; deshalb hier bewusst mit `body`-Präfix (höhere Spezifität als
-   die 4 Snippet-Klassen), damit die Staffelung gewinnt — OHNE das Snippet zu
-   editieren. Der Header-Block im Snippet ist dadurch redundant (siehe Notiz). */
+/* 9c. Headings in live preview — the same COLOUR and WEIGHT ladder as in reading
+   view (section 8). The active snippet `style.css` colours ALL headers one colour
+   via `.theme-* .cm-editor .cm-content .cm-header{,-1,-2,-3} !important`, so these
+   rules are deliberately prefixed with `body` (higher specificity than the four
+   snippet classes) to make the ladder win — WITHOUT editing the snippet. The
+   header block in the snippet is therefore redundant (see the note). */
 body.theme-dark  .cm-editor .cm-content .cm-header-1,
 body.theme-light .cm-editor .cm-content .cm-header-1 { color: var(--nx-accent-fg) !important; font-weight: 800; }
 body.theme-dark  .cm-editor .cm-content .cm-header-2,
@@ -786,7 +792,7 @@ body.theme-light .cm-editor .cm-content .cm-header-6 { color: color-mix(in srgb,
   border-right-color: var(--interactive-accent) !important;
 }
 
-/* 9f. Zeilennummern: klein + Akzent */
+/* 9f. Line numbers: small, in the accent */
 body .cm-editor .cm-lineNumbers .cm-gutterElement {
   font-size: 8px !important;
   color: var(--interactive-accent) !important;
@@ -794,10 +800,10 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
 
 
 /* ============================================================================
- * 10. PROPERTIES  —  ruhiges Listen-Design (Notion-Stil)  (früher: properties.css)
+ * 10. PROPERTIES  —  a quiet list design, Notion-style  (was: properties.css)
  * ========================================================================== */
 
-/* 10a. Container: rahmenlos, linksbündig */
+/* 10a. Container: no frame, aligned left */
 .metadata-container {
   width: 100%;
   margin: 1.6em 0 2.4em;
@@ -808,7 +814,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
 }
 .metadata-properties-heading { display: none; }
 
-/* 10b. Zeilen: kompakt, ganze Zeile hoverbar */
+/* 10b. Rows: compact, the whole row hoverable */
 .metadata-property {
   background-color: transparent !important;
   border: none !important;
@@ -824,7 +830,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   border: none !important;
 }
 
-/* 10c. Keys: gedämpft, schmal, mit Icon */
+/* 10c. Keys: muted, narrow, with an icon */
 .metadata-property-key {
   background-color: transparent !important;
   border: none !important;
@@ -868,7 +874,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
 .multi-select-pill-remove-button { color: var(--text-faint); }
 .multi-select-pill-remove-button:hover { color: var(--text-normal); }
 
-/* 10e. „Add property"-Button: sehr dezent, erscheint beim Hover */
+/* 10e. The "Add property" button: very quiet, appears on hover */
 .metadata-add-button.text-icon-button {
   color: var(--text-muted);
   background-color: transparent;
@@ -891,10 +897,10 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   background-color: var(--background-modifier-hover);
 }
 
-/* Leerer Property-Block (data-property-count="0"): Obsidian versteckt den
- * GESAMTEN Container (display:none); da wir das Heading (den Aufklapp-Punkt)
- * verstecken, bliebe der „Add property"-Button unerreichbar. Darum Container
- * + Inhalt hier erzwungen einblenden. */
+/* An empty property block (data-property-count="0"): Obsidian hides the WHOLE
+ * container with display:none. Since we hide the heading — which is the thing
+ * you expand — the "Add property" button would be unreachable. So the container
+ * and its content are forced back into view here. */
 .metadata-container[data-property-count="0"] {
   display: block !important;
 }
@@ -933,12 +939,12 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
 
 
 /* ============================================================================
- * 11. CHECKLISTS  —  Aufgaben-Zustände  (früher: checklists.css)
- *     (Die reinen Trennlinien-/Nesting-Regeln waren im Snippet auskommentiert
- *      und bleiben es hier bewusst, um die Optik nicht zu verändern.)
+ * 11. CHECKLISTS  —  task states  (was: checklists.css)
+ *     (The plain divider and nesting rules were commented out in the snippet and
+ *      stay that way here on purpose, so the look does not change.)
  * ========================================================================== */
 
-/* Basis: Checkboxen fürs Custom-Styling vorbereiten */
+/* Base: prepare the checkboxes for custom styling */
 .task-list-item-checkbox {
   -webkit-appearance: none !important;
   appearance: none !important;
@@ -970,7 +976,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   font-size: 0.85em !important; line-height: 1 !important;
 }
 
-/* [/] in Bearbeitung (halb ausgefüllt) */
+/* [/] in progress (half filled) */
 .task-list-item[data-task="/"] .task-list-item-checkbox {
   background: linear-gradient(to right, var(--color-blue) 50%, transparent 50%) !important;
   border-color: var(--color-blue) !important;
@@ -1008,7 +1014,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
 
 
 /* ============================================================================
- * 12. CALLOUTS  —  runde, akzentuierte Callouts  (früher: callouts.css)
+ * 12. CALLOUTS  —  round, accented callouts  (was: callouts.css)
  * ========================================================================== */
 
 .callout {
@@ -1023,29 +1029,28 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
      worked. Never wrap it again; the plugin converts its stored triplets on the
      way out (main.js · applyCallouts).
 
-     ABER: welche Schreibweise gilt, haengt an der OBSIDIAN-VERSION, nicht am
-     Vault. Auf einem Geraet, das die Umstellung noch nicht mitgemacht hat, ist
-     --callout-color weiter ein Triplet, `color-mix()` damit ungueltig und die
-     ganze Deklaration faellt weg -> derselbe Vault sah auf zwei Geraeten
-     unterschiedlich aus. Darum wird hier --nx-callout-c gelesen: das
-     normalisiert das Plugin zur Laufzeit auf eine echte FARBE, passend zur
-     jeweiligen Obsidian-Version (main.js · _calloutTripletMode). Der
-     var()-Fallback haelt das Theme allein lauffaehig, solange Obsidian aktuell
-     ist.
+     BUT: which spelling applies depends on the OBSIDIAN VERSION, not on the
+     vault. On a device that has not made the change yet, --callout-color is
+     still a triplet, `color-mix()` on it is invalid and the whole declaration
+     falls away again — so the same vault looked different on two devices. That
+     is why --nx-callout-c is read here instead: the plugin normalises it at
+     runtime to a real COLOUR, matching whichever Obsidian version is running
+     (main.js · _calloutTripletMode). The var() fallback keeps the theme working
+     on its own as long as Obsidian is current.
 
-     KEIN Rahmen: die Farbe steckt in der FLÄCHE, ruhig getönt — ein farbiger
-     Block, kein umrandeter Kasten. Gemischt wird in --background-primary (die
-     Fläche darunter), nicht auf transparent, damit die Tönung auf jedem
-     Notiz-Hintergrund gleich ruhig bleibt. */
+     NO border: the colour lives in the SURFACE, quietly tinted — a coloured
+     block, not a boxed-in frame. It is mixed into --background-primary (the
+     surface underneath) rather than into transparent, so the tint stays equally
+     quiet on any note background. */
   --nx-callout-tint: 16%;
   background-color: color-mix(in srgb,
     var(--nx-callout-c, var(--callout-color)) var(--nx-callout-tint), var(--background-primary));
   border: none;
   border-radius: 20px !important;
 }
-/* Live Preview: der Hover-/Auswahl-Rahmen, den Obsidian um den Callout-Embed-Block
-   legt, nutzt sonst den Default-Radius → sichtbarer Mismatch zum 20px-Callout.
-   Radius (und den runden Hover-Hintergrund) an den Callout angleichen. */
+/* Live preview: the hover and selection frame Obsidian puts around the callout
+   embed block otherwise uses the default radius → a visible mismatch against the
+   20px callout. Match the radius (and the rounded hover background) to it. */
 .markdown-source-view.mod-cm6 .cm-embed-block.cm-callout,
 .markdown-source-view.mod-cm6 .cm-embed-block:has(> .callout),
 .markdown-source-view.mod-cm6 .cm-embed-block:has(> .callout):hover {
@@ -1072,9 +1077,9 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   margin: 20px 0 20px 0 !important;
 }
 
-/* Eigene Callout-Typen — kräftiger gefüllt als der Rest, aber über dieselbe
-   Tint-Formel (ein voll gesättigter Farbblock killt die Lesbarkeit des
-   Fließtexts darauf). */
+/* The plugin's own callout types — filled more strongly than the rest, but
+   through the same tint formula (a fully saturated block of colour destroys the
+   legibility of the body text on top of it). */
 .callout[data-callout="track_of_day"] {
   --callout-icon: lucide-clipboard-list;
   --nx-callout-tint: 45%;
@@ -1090,29 +1095,31 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
 
 
 /* ============================================================================
- * 13. GRAPH-VIEW  —  Farben + Sternenkarten-Hintergrund  (früher: graph.css)
+ * 13. GRAPH VIEW  —  colours plus a star-chart background  (was: graph.css)
  * ========================================================================== */
 
-/* Die drei Knotenarten bekommen die drei Leitfarben der Palette, die Kanten die
-   vierte — direkt aus den Paletten-Slots, nicht aus --nx-accent, damit jede
-   Farbe wirklich die Swatch-Farbe ist und nicht deren gedämpfte Flächen-Variante:
+/* The three kinds of node take the three lead colours of the palette and the
+   edges take the fourth — straight from the palette slots rather than from
+   --nx-accent, so each colour really is the swatch colour and not its muted
+   surface variant:
 
-     Notizen  = Madder      → color1  (warmer Rot-/Orange-Slot)
-     Tags      = Prussian    → color4  (Blau-Slot; in „nexus" identisch color5)
-     Anhänge   = Rain Boots ⊕ Prussian — dieselbe Familie wie die Notizen, aber
-                 mit dem Blau gebrochen, also klar unterscheidbar ohne 5. Farbe
-     Kanten    = Rain Boots  → color3  (gelblicher Orange-Slot)
+     Notes       = Madder      → color1  (the warm red/orange slot)
+     Tags        = Prussian    → color4  (the blue slot; identical to color5 in "nexus")
+     Attachments = Rain Boots ⊕ Prussian — the same family as the notes, but
+                   broken with the blue, so it is clearly distinguishable without
+                   introducing a fifth colour
+     Edges       = Rain Boots  → color3  (the yellowish orange slot)
 
-   ANSI-Slots statt Hex, damit die Zuordnung bei jeder anderen Palette dieselbe
-   Logik behält (rot/blau/gelb sitzen dort auf denselben Nummern).
-   color-mix statt --interactive-accent-rgb: das Triplet war undefiniert → graue
-   Defaults.
+   ANSI slots rather than hex, so the mapping keeps the same logic on any other
+   palette (red, blue and yellow sit on the same numbers there).
+   color-mix rather than --interactive-accent-rgb: that triplet was undefined,
+   which gave grey defaults.
 
-   Die beiden Zahlen sind am gerenderten Graphen abgestimmt (60/20): Prussian pur
-   ist die DUNKELSTE der vier Rollen und würde auf dem Aubergine-Grund
-   zurücktreten statt als Hub aufzufallen — 40 % Prussian auf color6 (dem hellen
-   Prussian derselben Familie) hebt es auf #2f5876, ohne die Farbe zu verlassen.
-   Die Kanten laufen bei 20 %, weil sie in der Masse sonst die Knoten zudecken. */
+   The two numbers are tuned against the rendered graph (60/20): pure Prussian is
+   the DARKEST of the four roles and would recede into the aubergine ground
+   instead of standing out as a hub — 40% Prussian on color6 (the light Prussian
+   of the same family) lifts it to #2f5876 without leaving the colour. The edges
+   run at 20%, because in bulk they would otherwise cover the nodes. */
 body .graph-view.color-fill            { color: var(--wl-color1, #ce3737) !important; }
 body .graph-view.color-fill-tag        { color: color-mix(in srgb, var(--wl-color4, #1b3854) 40%, var(--wl-color6, #3d6d8c)) !important; }
 body .graph-view.color-fill-attachment { color: color-mix(in srgb, var(--wl-color3, #fb6734) 55%, var(--wl-color4, #1b3854)) !important; }
@@ -1121,8 +1128,8 @@ body .graph-view.color-line            { color: color-mix(in srgb, var(--wl-colo
 body .graph-view.color-line-highlight  { color: color-mix(in srgb, var(--wl-color3, #fb6734) 88%, transparent) !important; }
 body .graph-view.color-arrow           { color: color-mix(in srgb, var(--wl-color3, #fb6734) 60%, transparent) !important; }
 body .graph-view.color-circle          { color: var(--wl-color3, #fb6734) !important; }
-/* Hover/Fokus: dieselbe Kantenfarbe, nur ins Helle gezogen — der Knoten poppt
-   heraus, ohne eine fünfte Farbe einzuführen. */
+/* Hover and focus: the same edge colour, only pulled lighter — the node pops out
+   without introducing a fifth colour. */
 body .graph-view.color-fill-highlight  { color: color-mix(in srgb, var(--wl-color3, #fb6734) 45%, var(--nx-fg-bright, #ffffff)) !important; }
 body .graph-view.color-fill-focused    { color: color-mix(in srgb, var(--wl-color3, #fb6734) 70%, var(--nx-fg-bright, #ffffff)) !important; }
 body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, #e9e7f4) 88%, var(--wl-color3, #fb6734)) !important; }
@@ -1162,7 +1169,7 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
 
 
 /* ============================================================================
- * 14. PDF-EMBED  —  eingebettete PDFs  (früher: pdf-embed.css)
+ * 14. PDF EMBEDS  —  embedded PDFs  (was: pdf-embed.css)
  * ========================================================================== */
 
 /* Both the hard-forced 370x470 + overflow:hidden box AND display:none on the
@@ -1177,7 +1184,7 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
 
 
 /* ============================================================================
- * 15. MULTI-COLUMN  —  Multi Column Markdown  (früher: multi-column.css)
+ * 15. MULTI-COLUMN  —  Multi Column Markdown  (was: multi-column.css)
  * ========================================================================== */
 
 .mcm-cm-preview {
@@ -1204,7 +1211,7 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
 
 
 /* ============================================================================
- * 16. PROPERTY-HIDER  —  interne/Banner-Properties ausblenden  (früher: hide.css)
+ * 16. PROPERTY HIDER  —  hide internal and banner properties  (was: hide.css)
  * ========================================================================== */
 
 .metadata-property[data-property-key="banner"],
@@ -1224,7 +1231,7 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
 
 
 /* ============================================================================
- * 17. EXCALIDRAW  —  „Excalidraw Data"-Sektion ausblenden  (früher: excalidraw.css)
+ * 17. EXCALIDRAW  —  hide the "Excalidraw Data" section  (was: excalidraw.css)
  * ========================================================================== */
 
 /* Reading View */
@@ -1247,8 +1254,8 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
 
 
 /* ============================================================================
- * 18. FONTS  —  lokale @font-face  (früher: fonts.css)
- *     Pfad relativ zu dieser Datei: .obsidian/themes/Nexus/ → ../../fonts/
+ * 18. FONTS  —  local @font-face  (was: fonts.css)
+ *     Paths are relative to this file: .obsidian/themes/Nexus/ → ../../fonts/
  * ========================================================================== */
 
 @font-face {
@@ -1257,21 +1264,21 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
 }
 
 /* ============================================================================
- * 19. RESPONSIVE / MOBILE  —  kompaktere Abstände & Radien auf kleinen
- *     Bildschirmen bzw. schmalen Fenstern, damit das Card-Layout auch auf
- *     Tablet/Handy luftig und „fancy" bleibt statt gequetscht.
+ * 19. RESPONSIVE / MOBILE  —  tighter spacing and radii on small screens and in
+ *     narrow windows, so the card layout stays airy on a tablet or a phone
+ *     instead of looking squeezed.
  * ========================================================================== */
 
-/* Handy (Obsidian setzt .is-phone): mehr Platz fürs Wesentliche, weichere Kanten
-   passen zu kleinen Flächen. */
+/* Phone (Obsidian sets .is-phone): more room for what matters, and softer edges,
+   which suit small surfaces. */
 .is-phone {
   --nx-gap: 8px;
   --nx-radius: 12px;
   --nx-r-tile: 8px;
 }
 
-/* Schmales Fenster am Desktop (z. B. vertikaler Split) bekommt dieselbe
-   Verdichtung — reagiert auf die Fensterbreite, nicht nur aufs Gerät. */
+/* A narrow window on the desktop (a vertical split, say) gets the same
+   tightening — it reacts to the window width, not only to the device. */
 @media (max-width: 620px) {
   body {
     --nx-gap: 8px;
@@ -1280,8 +1287,8 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
   }
 }
 
-/* Modal-Dialoge (Timer-Popup, Configs) auf schmalen Screens breiter nutzen,
-   damit sie nicht als winziges Kästchen mittig kleben. */
+/* Modal dialogs (the timer popup, the config sheets) use more of a narrow screen,
+   so they do not sit in the middle as a tiny box. */
 @media (max-width: 620px) {
   .modal:not(.mod-sidebar) {
     width: min(94vw, 460px);
@@ -1290,9 +1297,9 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
   .nx-timerdone-title { font-size: 1.15em; }
 }
 
-/* Properties: die feste 160px-Key-Spalte (Abschnitt 10c) lässt auf einem Handy
-   kaum Platz für den Wert — Key über Wert stapeln, genau wie es das
-   Properties-Side-Panel ohnehin schon tut. */
+/* Properties: the fixed 160px key column (section 10c) leaves almost no room for
+   the value on a phone — stack the key above the value, exactly as the
+   properties side panel already does. */
 @media (max-width: 620px) {
   .metadata-property {
     flex-direction: column;
@@ -1306,45 +1313,45 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
   }
   .metadata-property-value { width: 100%; }
 
-  /* Bilder auf 70 % der Textbreite (Abschnitt 14) sind auf dem Handy
-     Briefmarken — dort die volle Spaltenbreite. */
+  /* Images at 70% of the text width (section 14) are postage stamps on a phone —
+     give them the full column width there. */
   .image-container { max-width: 100%; }
 }
 
-/* ── Mobile Safe-Area (Android/iOS Statusleiste) ──────────────────────────────
-   Reserviert oben Platz, damit die Tab-Leiste NICHT hinter der Systemzeile
-   (WLAN/Bluetooth/Akku) verschwindet und klickbar bleibt. Diese Android-WebView
-   meldet env(safe-area-inset-top) teils als 0 → harter Floor via max(). */
+/* ── Mobile safe area (the Android/iOS status bar) ────────────────────────────
+   Reserves room at the top so the tab bar does NOT disappear behind the system
+   row (wifi, bluetooth, battery) and stays clickable. This Android WebView
+   sometimes reports env(safe-area-inset-top) as 0 → a hard floor via max(). */
 .is-mobile .app-container {
   padding-top: max(env(safe-area-inset-top, 0px), 34px) !important;
 }
 
 
 /* ============================================================================
- * 20. „NEXUS DUSK" — konsistentes, GEDÄMPFTES Flächen-System (nur `nexus`)
+ * 20. "NEXUS DUSK" — a consistent, MUTED surface system (`nexus` only)
  * ----------------------------------------------------------------------------
- *  Aktiv über Body-Klasse `nx-blocked` (Plugin, nur `nexus`). Prinzip: EINE
- *  warme Dark-Plum-Familie; jeder Flächen-TYP bekommt EINEN eigenen, leisen
- *  Farbstich, aber alle liegen dicht im selben Helligkeitsband → WEICHE
- *  Übergänge, KEIN harter Kontrast. Aubergine/Claret-Familie (Grün immer der
- *  niedrigste Kanal → Pflaume/Wein statt Braun). Ladder (dunkel → hell):
- *  Grund #1b1018 < Editor #221722 (ruhig) < Karten/Sidebar #2a1b27 (pflaume,
- *  EINE Farbe für alle Karten) < Ordner #3b2030 (gedämpftes Wein/Claret).
- *  Akzent = gedämpftes Coral, NUR auf Icons/Links/aktiv. Kein Patchwork,
- *  kein Neon, kein Braun. Nur .theme-dark.
+ *  Switched on by the body class `nx-blocked` (plugin, `nexus` only). The idea:
+ *  ONE warm dark-plum family; every TYPE of surface gets one quiet cast of its
+ *  own, but all of them sit close together in the same brightness band → SOFT
+ *  transitions, NO hard contrast. Aubergine and claret family (green is always
+ *  the lowest channel → plum and wine rather than brown). The ladder, dark to
+ *  light: ground #1b1018 < editor #221722 (quiet) < cards and sidebar #2a1b27
+ *  (plum, ONE colour for every card) < folders #3b2030 (muted wine/claret).
+ *  The accent is a muted coral, used ONLY on icons, links and active states.
+ *  No patchwork, no neon, no brown. Dark theme only.
  * ========================================================================== */
 body.nx-blocked.theme-dark {
-  /* Aubergine/Claret-Familie: Grün ist IMMER der niedrigste Kanal (B≥G) →
-     Pflaume/Wein-Unterton statt Braun. Enges Helligkeitsband = weich. */
-  --nx-desk:        #1b1018;   /* hinterster Grund (Aubergine-Schwarz)  */
-  --nx-chip:        #221722;   /* Editor — ruhige Pflaume-Lesefläche    */
+  /* Aubergine and claret family: green is ALWAYS the lowest channel (B >= G) →
+     a plum/wine undertone rather than brown. A narrow brightness band reads soft. */
+  --nx-desk:        #1b1018;   /* the deepest ground (aubergine black)   */
+  --nx-chip:        #221722;   /* editor — a quiet plum reading surface  */
   --nx-floor:       #2a1b27;   /* Karten-Basis                          */
-  --nx-chip-side:   #2a1b27;   /* Karten / Sidebars / Dock (EINE Farbe) */
-  --nx-elevated:    #33253a;   /* Menüs / Inputs / Hover                */
+  --nx-chip-side:   #2a1b27;   /* cards / sidebars / dock (ONE colour)   */
+  --nx-elevated:    #33253a;   /* menus / inputs / hover                */
   --nx-border:      rgba(232, 220, 236, 0.07);   /* weiche Haarlinie    */
 
   --nx-accent:      #db6a4b;   /* warmes Coral — Tint/aktiv (sparsam)   */
-  --nx-accent-fg:   #e5876a;   /* Text: Links/Überschriften/Icons       */
+  --nx-accent-fg:   #e5876a;   /* text: links, headings, icons          */
   --nx-mark:        color-mix(in srgb, #db6a4b 26%, transparent);
 
   --nx-fg:          #e6dee4;
@@ -1352,20 +1359,21 @@ body.nx-blocked.theme-dark {
   --nx-fg-bright:   #f4eef4;
 }
 
-/* Aktiver Tab: nur SANFT getönt (nicht laut). */
+/* Active tab: only GENTLY tinted, never loud. */
 body.nx-blocked.theme-dark .mod-root .workspace-tab-header.is-active {
   background-color: color-mix(in srgb, var(--nx-accent) 18%, var(--nx-chip-side)) !important;
 }
 
-/* ── EXPLORER: die Ordner bekommen EINEN eigenen, GEDÄMPFTEN Wein/Claret-Ton
-      — dicht am Panel-Wert, also WEICH abgesetzt statt Neon; Purpur-Unterton
-      (kein Braun). Panel bleibt pflaume. ──────────────────────────────────── */
+/* ── EXPLORER: the folders take ONE muted wine/claret tone of their own — close
+      to the panel value, so it is SOFTLY set off rather than neon, with a purple
+      undertone and no brown. The panel stays plum. ─────────────────────────── */
 body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item) {
-  /* Ember → Prussian: Ember-Grundton nach Position (--i, oben am kräftigsten)
-     PLUS vertikaler Verlauf, der zum Fuß ins kühle Prussian kippt; je weiter
-     unten der Ordner, desto mehr Prussian → warm→kühl über die ganze Liste.
-     --fld-tint/--i werden vom Basis-Block (body.nx-explorer-folders …) berechnet. */
+  /* Ember → Prussian: an Ember base tone from the position (--i, strongest at the
+     top) PLUS a vertical gradient tipping into the cool Prussian at the foot; the
+     further down the folder, the more Prussian → warm to cool across the whole
+     list. --fld-tint and --i are worked out by the base block
+     (body.nx-explorer-folders …). */
   background: var(--fld-tint) !important;
   border: 1px solid color-mix(in srgb, var(--nx-fg-bright) 7%, transparent) !important;
 }
@@ -1377,10 +1385,10 @@ body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item) .nav-file-title {
   color: var(--nx-fg-bright) !important;
 }
-/* Hover: die GANZE flache Pill gleichmäßig aufhellen — KEIN inneres Kästchen,
-   kein Ring (das wirkte wie eine Box-in-Box). :has() lässt den Block reagieren,
-   wenn seine Titelzeile gehovert wird; die Titelzeile selbst bleibt transparent,
-   damit die aufgehellte Blockfläche durchgängig zu sehen ist. */
+/* Hover: lighten the WHOLE flat pill evenly — NO inner box and no ring, which
+   read as a box inside a box. :has() lets the block react when its title row is
+   hovered; the title row itself stays transparent, so the lightened block face
+   is visible all the way across. */
 body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item):has(> .tree-item-self.nav-folder-title:hover) {
   background: color-mix(in srgb, #ffffff 12%, var(--fld-tint)) !important;
@@ -1392,7 +1400,7 @@ body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
   box-shadow: none !important;
   color: var(--nx-fg-bright) !important;
 }
-/* Kind-Dateien im aufgeklappten Block: dezenter Hover (ganze Zeile, flach) */
+/* Child files in an expanded block: a quiet hover on the whole row, flat */
 body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item)
   .nav-folder-children .tree-item-self:hover {
@@ -1403,15 +1411,16 @@ body.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
   background: rgba(255, 255, 255, 0.08) !important;
   color: var(--nx-accent-fg) !important;
 }
-/* Fallback ohne Ordner-Block-Modus: Ordner-Titelzeile terracotta. */
+/* Fallback without the folder-block mode: the folder title row in terracotta. */
 body.nx-blocked.theme-dark:not(.nx-explorer-folders)
   .workspace-leaf-content[data-type="file-explorer"] .nav-folder-title {
-  background: #3b2030 !important;   /* gedämpftes Wein/Claret statt Terracotta */
+  background: #3b2030 !important;   /* muted wine/claret instead of terracotta */
   border-radius: var(--nx-r-tile) !important;
 }
 
-/* ── Dashboard KONSISTENT: alle Stat-Kacheln & Karten = EINE Farbe (Karten-Ton),
-      kein Patchwork. Akzent nur auf Icon. Überschreibt 04-homepage.css. ────── */
+/* ── Dashboard, kept CONSISTENT: every stat tile and card takes ONE colour (the
+      card tone), not a patchwork. The accent goes on the icon only. Overrides
+      04-homepage.css. ──────────────────────────────────────────────────────── */
 body.nx-blocked.theme-dark .nx-home-stat,
 body.nx-blocked.theme-dark .nx-home-card:not(.nx-noborder) {
   background: var(--nx-chip-side) !important;
@@ -1428,21 +1437,21 @@ body.nx-blocked.theme-dark .nx-home-card .nx-home-card-icon {
 
 
 /* ============================================================================
- * 21. STYLE „ALMOST NOTHING"  —  body.nx-style-plain  (Plugin: Theme → Style)
+ * 21. THE "ALMOST NOTHING" STYLE  —  body.nx-style-plain  (plugin: Theme → Style)
  * ----------------------------------------------------------------------------
- *  Der zweite Style neben mirobo (Abschnitt 6). mirobo baut aus jedem Bereich
- *  eine schwebende Card; dieser hier baut GAR NICHTS und orientiert sich dabei
- *  offen an Notion: eine durchgehende Fläche, Haarlinien statt Rändern, fast
- *  kein Radius, System-Sans, enge Block-Abstände, Text als einzige Hierarchie.
- *  Farbe trägt nur noch Bedeutung (aktiv, fällig, erledigt) — keine Fläche.
+ *  The second style beside mirobo (section 6). mirobo builds every area into a
+ *  floating card; this one builds NOTHING, and is openly modelled on Notion: one
+ *  continuous surface, hairlines instead of borders, almost no radius, a system
+ *  sans, tight block spacing, and text as the only hierarchy. Colour carries
+ *  meaning alone — active, due, done — and never a surface.
  *
- *  Die Notion-Maße stehen absichtlich als Zahlen da (708px Textspalte, 1.875em
- *  H1, 4px unter der Überschrift, 85% Code): das sind die Werte, an denen der
- *  Look hängt, und ein Token dafür würde nur verstecken, woher sie kommen.
+ *  The Notion measurements are written as plain numbers on purpose (a 708px text
+ *  column, 1.875em H1, 4px under a heading, 85% code): those are the values the
+ *  look hangs on, and a token for them would only hide where they came from.
  *
- *  Er steht am ENDE der Datei: einige Regeln müssen die !important-Regeln aus
- *  Abschnitt 6/7/20 überstimmen, und bei gleicher Spezifität gewinnt die
- *  spätere. Die Palette bleibt frei — der Style formt, die Palette färbt.
+ *  It sits at the END of the file: some rules have to beat the !important rules
+ *  from sections 6, 7 and 20, and at equal specificity the later one wins. The
+ *  palette stays free — the style shapes, the palette colours.
  * ========================================================================== */
 
 body.nx-style-plain {
@@ -1460,16 +1469,17 @@ body.nx-style-plain {
   --tab-radius-active: 4px;
   --divider-width: 1px;
 
-  /* ── Schrift: Notions eigener Stack, für UI UND Text ── */
+  /* ── Type: Notion's own stack, for the UI AND the text ── */
   --font-text-theme: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Helvetica Neue", Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
   --font-interface-theme: var(--font-text-theme);
   --font-monospace-theme: "SFMono-Regular", ui-monospace, Menlo, Consolas,
     "Liberation Mono", "Courier New", monospace;
 
-  /* ── Maße: enge Blöcke, 708px Textspalte, große Sprünge nur bei Überschriften ── */
+  /* ── Measurements: tight blocks, a 708px text column, big jumps only at
+     headings ── */
   --line-height-normal: 1.5;
-  --p-spacing: 0.25rem;              /* Notion setzt Blöcke ~4px auseinander */
+  --p-spacing: 0.25rem;              /* Notion puts blocks about 4px apart */
   --heading-spacing: 1.6em;
   --file-line-width: 708px;
   --h1-size: 1.875em;
@@ -1487,10 +1497,10 @@ body.nx-style-plain {
   --inline-title-weight: 700;
   --bold-weight: 600;
 
-  /* ── Farbrollen, die dieser Style zusätzlich braucht ──
-     --nx-surface-2 = die eine getönte Fläche für Code/Callout/Tabellenkopf,
-     --nx-code = Notions rote Inline-Code-Schrift. Beide liefert die Palette
-     „Minimal" mit; jede andere bekommt hier eine Ableitung. */
+  /* ── The colour roles this style needs on top ──
+     --nx-surface-2 = the one tinted surface for code, callouts and table heads;
+     --nx-code = Notion's red inline-code type. The "Minimal" palette supplies
+     both; every other palette gets a derivation here. */
   --nx-surface-2: color-mix(in srgb, var(--nx-fg) 8%, transparent);
   --nx-code: var(--color-red, #eb5757);
   --code-background: var(--nx-surface-2);
@@ -1502,7 +1512,7 @@ body.nx-style-plain {
   --nav-item-size: 14px;
 }
 
-/* ── Schreibtisch weg: EINE Fläche, keine Lücken ── */
+/* ── Desk removed: ONE surface, no gaps ── */
 body.nx-style-plain .horizontal-main-container { padding: 0 !important; }
 body.nx-style-plain,
 body.nx-style-plain .workspace,
@@ -1515,7 +1525,7 @@ body.nx-style-plain .status-bar {
   font-size: 12px;
 }
 
-/* ── Cards → Flächen. Getrennt wird durch eine Haarlinie, nicht durch Luft. ── */
+/* ── Cards become surfaces. They are separated by a hairline, not by air. ── */
 body.nx-style-plain .workspace-tab-header-container,
 body.nx-style-plain .workspace-tab-container {
   margin: 0 !important;
@@ -1536,9 +1546,9 @@ body.nx-style-plain .mod-root .workspace-tab-header-container {
   padding-inline: 6px !important;
 }
 
-/* Tabs: keine Pillen, 14px, gedämpft. Aktiv = etwas hellere Fläche.
-   (Die Kette mit .workspace-split.mod-root schlägt Abschnitt 20 bei gleicher
-   Spezifität über die Reihenfolge — deshalb steht dieser Abschnitt am Ende.) */
+/* Tabs: no pills, 14px, muted. Active = a slightly lighter surface.
+   (The chain with .workspace-split.mod-root beats section 20 at equal
+   specificity through source order — which is why this section is last.) */
 body.nx-style-plain .workspace-tab-header {
   background-color: transparent !important;
   border-radius: 4px !important;
@@ -1551,7 +1561,7 @@ body.nx-style-plain .workspace-tab-header:hover {
   background-color: color-mix(in srgb, var(--nx-fg) 5%, transparent) !important;
 }
 
-/* Ribbon + Vault-Wähler: Teil der Seitenleiste, keine eigenen Karten. */
+/* Ribbon and vault picker: part of the sidebar, not cards of their own. */
 body.nx-style-plain .workspace-ribbon.mod-left,
 body.nx-style-plain .side-dock-ribbon.mod-left {
   margin: 0 !important;
@@ -1570,8 +1580,8 @@ body.nx-style-plain .workspace-sidedock-vault-profile {
   font-size: 14px;
 }
 
-/* ── Seitenleiste im Notion-Maß: 14px, 27px hohe Zeilen, gedämpfte Schrift,
-      graue Hover-Fläche, keine Ordner-Blöcke, keine Tönung. ── */
+/* ── The sidebar at Notion's measurements: 14px, 27px rows, muted type, a grey
+      hover surface, no folder blocks and no tint. ── */
 body.nx-style-plain.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item),
 body.nx-style-plain.nx-blocked.theme-dark.nx-explorer-folders .nav-files-container
@@ -1590,7 +1600,7 @@ body.nx-style-plain .nav-folder-title {
   padding: 3px 8px;
   font-size: 14px;
   line-height: 1.3;
-  color: var(--nx-fg-muted) !important;   /* Core faerbt die Zeile dunkler */
+  color: var(--nx-fg-muted) !important;   /* the core colours the row darker */
 }
 body.nx-style-plain .nav-files-container .tree-item:not(.tree-item .tree-item)
   > .nav-folder-title .nav-folder-title-content {
@@ -1608,16 +1618,16 @@ body.nx-style-plain .nav-file-title.is-active {
   font-weight: 500;
 }
 body.nx-style-plain .nav-folder-title-content:hover { color: var(--nx-fg-bright) !important; }
-/* Die Einrückungshilfe ist in Notion nicht da — sie zerhackt die ruhige Spalte. */
+/* Notion has no indent guide — it chops up the quiet column. */
 body.nx-style-plain .nav-folder-children .tree-item-children { border-left: none !important; }
 body.nx-style-plain .workspace-leaf-content[data-type="file-explorer"] .nav-header { padding: 4px 6px 0; }
 
 /* ── Text ────────────────────────────────────────────────────────────────────
-   Notion staffelt über Größe und Gewicht, nie über Farbe, und setzt die
-   Überschrift dicht an ihren Absatz: viel Luft DARÜBER, fast keine darunter. */
-/* Diese Tokens setzt Abschnitt 8 auf .markdown-rendered SELBST — ein Wert auf
-   <body> wird dort also nie gelesen. Deshalb stehen Gewichte, Farben und die
-   Zeilenhöhe hier noch einmal auf denselben Elementen. */
+   Notion ranks by size and weight, never by colour, and sets a heading close to
+   its own paragraph: a lot of air ABOVE it, almost none below. */
+/* Section 8 sets these tokens on .markdown-rendered ITSELF, so a value on <body>
+   is never read there. That is why the weights, colours and line height are
+   repeated here on the same elements. */
 body.nx-style-plain .markdown-rendered,
 body.nx-style-plain .markdown-source-view {
   --h1-color: var(--nx-fg-bright);
@@ -1635,7 +1645,7 @@ body.nx-style-plain .markdown-source-view {
 }
 body.nx-style-plain .markdown-preview-view,
 body.nx-style-plain .markdown-source-view.mod-cm6 .cm-content {
-  --line-height-normal: 1.5;      /* Notion liest auf 24px Zeilenhöhe */
+  --line-height-normal: 1.5;      /* Notion reads at a 24px line height */
 }
 body.nx-style-plain .markdown-rendered h1 { margin: 1.2em 0 4px; }
 body.nx-style-plain .markdown-rendered h2 { margin: 1.1em 0 2px; }
@@ -1647,9 +1657,9 @@ body.nx-style-plain .markdown-rendered > :first-child,
 body.nx-style-plain .markdown-preview-sizer > div:first-child > :first-child { margin-top: 0; }
 body.nx-style-plain .markdown-rendered h6 { letter-spacing: .04em; text-transform: none; }
 body.nx-style-plain .markdown-rendered p { margin: 1px 0; padding: 3px 2px; }
-/* Live Preview: dort kommt der Abstand über der Überschrift aus dem
-   padding-top der Zeile, nicht aus einem margin — sonst kleben H1/H2 am
-   Absatz davor (der User schreibt ausschließlich in Live Preview). */
+/* Live preview: there the space above a heading comes from the line's
+   padding-top, not from a margin — otherwise H1 and H2 stick to the paragraph
+   before them (and this vault is written entirely in live preview). */
 body.nx-style-plain .cm-s-obsidian .cm-line.HyperMD-header { padding-top: 1.4em; }
 body.nx-style-plain .cm-s-obsidian .cm-line.HyperMD-header-1 { padding-top: 1.9em; }
 body.nx-style-plain .cm-s-obsidian .cm-line.HyperMD-header:first-child { padding-top: 0; }
@@ -1664,8 +1674,8 @@ body.nx-style-plain .markdown-rendered ul > li::marker,
 body.nx-style-plain .markdown-rendered ol > li::marker,
 body.nx-style-plain .cm-editor .cm-formatting-list { color: var(--nx-fg-muted); font-weight: 400; }
 
-/* Links: Textfarbe mit zurückhaltender Unterlänge — in Notion trägt ein Link
-   keine eigene Farbe, er ist unterstrichen. Nicht aufgelöste bleiben erkennbar. */
+/* Links: text colour with a restrained underline — in Notion a link carries no
+   colour of its own, it is underlined. Unresolved ones stay recognisable. */
 body.nx-style-plain .markdown-rendered a:not(.tag),
 body.nx-style-plain .cm-editor .cm-underline,
 body.nx-style-plain .cm-editor .cm-hmd-internal-link {
@@ -1685,7 +1695,7 @@ body.nx-style-plain .cm-editor .is-unresolved {
   color: var(--nx-fg-muted);
   text-decoration-style: dotted;
 }
-/* Tags bleiben Chips — sie sind ein Filter, kein Fließtext. */
+/* Tags stay chips — they are a filter, not body text. */
 body.nx-style-plain .markdown-rendered a.tag,
 body.nx-style-plain .cm-editor .cm-hashtag {
   color: var(--nx-fg-muted) !important;
@@ -1697,7 +1707,7 @@ body.nx-style-plain .cm-editor .cm-hashtag {
   text-decoration: none;
 }
 
-/* Code: 85 %, rote Schrift auf der einen getönten Fläche. */
+/* Code: 85%, red type on the one tinted surface. */
 body.nx-style-plain :not(pre) > code,
 body.nx-style-plain .cm-editor .cm-inline-code {
   color: var(--nx-code);
@@ -1715,7 +1725,7 @@ body.nx-style-plain .cm-editor .HyperMD-codeblock-bg {
 }
 body.nx-style-plain .markdown-rendered pre > code { font-size: 1em; }
 
-/* Trenner, Zitat, Fußnote, Marker */
+/* Rules, quotes, footnotes, highlights */
 body.nx-style-plain .markdown-rendered hr {
   height: 1px;
   background: var(--nx-border);
@@ -1747,8 +1757,8 @@ body.nx-style-plain .cm-editor .cm-highlight {
   padding: .1em .15em;
 }
 
-/* Callout: dieselbe getönte Fläche wie in Abschnitt 12, nur flacher und eine
-   Spur leiser — kein Rahmen, keine Kante, die Farbe liegt in der Fläche. */
+/* Callout: the same tinted surface as in section 12, only flatter and a shade
+   quieter — no frame and no edge, the colour lives in the surface. */
 body.nx-style-plain .callout {
   --nx-callout-tint: 11%;
   border-radius: 4px !important;
@@ -1767,7 +1777,7 @@ body.nx-style-plain .callout-icon { color: var(--nx-callout-c, var(--callout-col
 body.nx-style-plain .callout-content { padding-top: 4px; }
 body.nx-style-plain .callout-content > :first-child { margin-top: 0; }
 
-/* Tabellen: Haarlinien-Gitter, getönter Kopf, keine Rundung. */
+/* Tables: a hairline grid, a tinted head, no rounding. */
 body.nx-style-plain .markdown-rendered table {
   border-radius: 0;
   font-size: .95em;
@@ -1790,7 +1800,7 @@ body.nx-style-plain .cm-editor input[type="checkbox"] {
   border-width: 1.4px;
 }
 
-/* Menüs, Modals, Eingaben: dünne Linie, kaum Radius, kein großer Schatten. */
+/* Menus, modals and inputs: a thin line, barely any radius, no large shadow. */
 body.nx-style-plain .menu,
 body.nx-style-plain .modal,
 body.nx-style-plain .suggestion-container,
@@ -1810,7 +1820,7 @@ body.nx-style-plain button {
   border-radius: 4px !important;
 }
 
-/* Scrollbars: dünn und farblos — sie sollen die Fläche nicht zerteilen. */
+/* Scrollbars: thin and colourless — they should not cut the surface up. */
 body.nx-style-plain ::-webkit-scrollbar { width: 8px; height: 8px; }
 body.nx-style-plain ::-webkit-scrollbar-track { background: transparent; }
 body.nx-style-plain ::-webkit-scrollbar-thumb {
@@ -1821,13 +1831,13 @@ body.nx-style-plain ::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--nx-fg) 30%, transparent);
 }
 
-/* ── Live Preview ────────────────────────────────────────────────────────────
-   Abschnitt 9 färbt im Editor Überschriften, Fettschrift, Einzugslinien und
-   Zeilennummern in den Akzent — mit !important. In „almost nothing" trägt
-   nichts davon Farbe: Fett ist fett, eine Überschrift ist größer, fertig.
-   Gleiche Spezifität wie dort, aber später in der Datei → gewinnt.
-   (Der User schreibt ausschließlich in Live Preview; ohne diesen Block sieht
-   der Style nur im Reading View aus wie gedacht.) */
+/* ── Live preview ────────────────────────────────────────────────────────────
+   Section 9 colours headings, bold, indent guides and line numbers in the editor
+   with the accent — using !important. In "almost nothing" none of that carries
+   colour: bold is bold, a heading is larger, and that is the whole hierarchy.
+   Same specificity as there, but later in the file → it wins.
+   (This vault is written entirely in live preview; without this block the style
+   only looks as intended in reading view.) */
 body.nx-style-plain .cm-editor .cm-content .cm-header-1,
 body.nx-style-plain .cm-editor .cm-content .cm-header-2,
 body.nx-style-plain .cm-editor .cm-content .cm-header-3,
@@ -1858,5 +1868,82 @@ body.nx-style-plain .cm-editor .cm-lineNumbers .cm-gutterElement {
   font-size: 12px !important;
   color: var(--nx-fg-muted) !important;
 }
-/* Die Formatierungszeichen (##, -, >) sollen im Editor zurücktreten. */
+/* The formatting marks (##, -, >) should step back in the editor. */
 body.nx-style-plain .cm-editor .cm-formatting { color: color-mix(in srgb, var(--nx-fg) 30%, transparent); }
+
+/* ============================================================================
+ * 23. DEVICE POLICY FOR CARDS  —  flat on a phone, tighter on a tablet
+ * ----------------------------------------------------------------------------
+ *  On a phone Obsidian only ever shows ONE column: the explorer, the editor and
+ *  the right sidebar are full-screen views that the drawer switches between.
+ *  Cards there separate nothing that is not already separated — they only cost
+ *  border, radius and area on the smallest screen there is. So the card system
+ *  is REMOVED there rather than shrunk.
+ *
+ *  On a tablet it still earns its place, because two columns really do sit side
+ *  by side — but tighter, and with ONE device instead of three: border yes,
+ *  shadow no, gap halved. Border plus shadow plus gap say the same thing three
+ *  times and make the columns look narrower than they are.
+ * ========================================================================== */
+
+/* ── Phone: no desk, no gap, no rounding, no border ────────────────────────── */
+.is-phone {
+  --nx-gap: 0px;
+  --nx-radius: 0px;
+  --nx-r-tile: 6px;              /* list entries keep a soft edge */
+  --nx-chip-shadow: none;
+}
+.is-phone .workspace,
+.is-phone .workspace-split.mod-root {
+  background-color: var(--nx-chip) !important;   /* the ground IS the surface now */
+  padding: 0 !important;
+}
+.is-phone .workspace-tab-header-container,
+.is-phone .workspace-tab-container,
+.is-phone .workspace-sidedock-vault-profile {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  box-shadow: none !important;
+}
+/* The explorer should use the full width on a phone: the tinted folder blocks
+   are pure wasted margin here, and the full-screen drawer already does the
+   separating. */
+.is-phone .nav-files-container {
+  margin-top: 8px !important;
+  padding: 2px 0 !important;
+}
+.is-phone.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) {
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* ── Tablet: cards yes, but with one device instead of three ───────────────── */
+.is-tablet {
+  --nx-gap: 8px;
+  --nx-radius: 10px;
+  --nx-chip-shadow: none;
+}
+.is-tablet .workspace-tab-header-container,
+.is-tablet .workspace-tab-container,
+.is-tablet .workspace-sidedock-vault-profile {
+  box-shadow: none !important;
+}
+/* On a tablet the folder blocks sit in an already narrow column — the double
+   inset (card border plus block border) eats the names there. */
+.is-tablet.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) {
+  margin-inline: 4px !important;
+}
+
+/* A narrow desktop window (a vertical split) behaves like a tablet: the policy
+   hangs on the width, not on the device. */
+@media (min-width: 621px) and (max-width: 1100px) {
+  body:not(.is-phone) {
+    --nx-gap: 8px;
+    --nx-radius: 10px;
+    --nx-chip-shadow: none;
+  }
+}
