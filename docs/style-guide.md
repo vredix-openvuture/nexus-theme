@@ -64,6 +64,28 @@ What was rejected, and why it is worth knowing:
 | Quieter blocks | Better, but still spends width on margins and still implies folders are weighted |
 | Plain list | Quietest and fastest to scan, but gives up the signature in the one place people look most |
 
+## Obsidian's own variables count as ours
+
+A rule the theme writes by hand covers one surface. A variable Obsidian reads
+covers every surface Obsidian draws — and there are far more of those than of
+ours. Leaving one unset does not mean "no opinion", it means Obsidian's opinion,
+which is a blue-violet accent that belongs to no palette here.
+
+So: **anything Obsidian derives from the palette must be handed the palette.**
+Section 4 of `theme.css` is where that happens. Two of them are easy to miss and
+are the reason this was a bug:
+
+- `--color-accent` is built from `--accent-h`, `--accent-s` and `--accent-l` —
+  three numbers, not a colour. Setting the colour alone does nothing for the two
+  dozen rules that read the components. The plugin emits the components from the
+  active palette's `color3`; the theme must not assume they are already right.
+- The **states** of a surface belong to whoever styled the surface. Styling a
+  menu panel and leaving `.menu-item.selected` to Obsidian is what produced a
+  palette-coloured dropdown with a blue row in it.
+
+When adding a rule that styles a native Obsidian element, check its states in
+the same change.
+
 ## Density
 
 - **One device, not three.** A border, a shadow and a gap all say "these are

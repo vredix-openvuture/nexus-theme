@@ -215,6 +215,59 @@
   --text-faint:   color-mix(in srgb, var(--nx-fg-muted) 60%, transparent);
   --text-on-accent: var(--nx-on-accent);
 
+  /* ── Obsidian's OWN accent ─────────────────────────────────────────────────
+     --color-accent is the root Obsidian derives its native controls from:
+     checkboxes, toggles, sliders, focus rings, and the selected row of a menu.
+     It was never set here, so every one of those kept Obsidian's default
+     blue-violet while everything the theme styled by hand went coral — which is
+     exactly why menus and native elements were the things that looked wrong,
+     and nothing else did. */
+  --color-accent:   var(--nx-accent);
+  --color-accent-1: color-mix(in srgb, var(--nx-accent) 84%, white);
+  --color-accent-2: color-mix(in srgb, var(--nx-accent) 84%, black);
+
+  /* Interactive states. Obsidian paints a lot of its own surfaces from these,
+     and an unset one falls back to a grey that belongs to no palette. */
+  --interactive-normal: var(--nx-elevated);
+  --interactive-hover:  color-mix(in srgb, var(--nx-accent) 16%, var(--nx-elevated));
+  --background-modifier-active-hover: color-mix(in srgb, var(--nx-accent) 22%, transparent);
+  --background-modifier-border-focus: color-mix(in srgb, var(--nx-accent) 60%, var(--nx-border));
+  --background-modifier-form-field:   var(--nx-elevated);
+  --text-selection: color-mix(in srgb, var(--nx-accent) 28%, transparent);
+
+  /* The selected row of a menu or a list. This is the blue row in the
+     dropdown: the theme styled the panel and left its states to Obsidian. */
+  --nav-item-background-active: color-mix(in srgb, var(--nx-accent) 18%, transparent);
+  --nav-item-color-active:      var(--nx-fg-bright);
+  --nav-item-background-hover:  var(--background-modifier-hover);
+
+  /* Form controls. */
+  --checkbox-color:              var(--nx-accent);
+  --checkbox-color-hover:        color-mix(in srgb, var(--nx-accent) 84%, white);
+  --checkbox-border-color:       color-mix(in srgb, var(--nx-fg-muted) 55%, transparent);
+  --checkbox-border-color-hover: var(--nx-accent);
+  --toggle-thumb-color:          var(--nx-fg-bright);
+  --slider-track-background:     color-mix(in srgb, var(--nx-fg-muted) 30%, transparent);
+  --slider-thumb-border-color:   var(--nx-accent);
+  --dropdown-background:         var(--nx-elevated);
+
+  /* Icons and tabs in their active state. */
+  --icon-color-active:             var(--nx-accent-fg);
+  --icon-color-focused:            var(--nx-fg-bright);
+  --tab-text-color-focused-active: var(--nx-fg-bright);
+
+  /* Surfaces the theme already draws by hand — named here as well, so anything
+     Obsidian paints from the variable matches what the rules draw. */
+  --modal-border-color:          var(--nx-border);
+  --prompt-border-color:         var(--nx-border);
+  --divider-color:               var(--nx-border);
+  --titlebar-background-focused: var(--nx-desk);
+  --pill-color-hover:            var(--nx-fg-bright);
+
+  --link-color:            var(--nx-accent-fg);
+  --link-color-hover:      color-mix(in srgb, var(--nx-accent-fg) 82%, white);
+  --link-unresolved-color: color-mix(in srgb, var(--nx-accent-fg) 55%, var(--nx-fg-muted));
+
   --scrollbar-thumb-bg:        color-mix(in srgb, var(--nx-fg-muted) 25%, transparent);
   --scrollbar-active-thumb-bg: var(--nx-accent);
 
@@ -420,6 +473,35 @@ body {
   border: 1px solid var(--nx-border);
   box-shadow: var(--nx-chip-shadow);
   background-color: var(--nx-elevated);
+}
+
+/* …and their STATES, drawn here rather than left to Obsidian.
+
+   This is the bug that made dropdowns the thing that looked wrong: the panel
+   was styled and the selected row was not, so it kept Obsidian's own default —
+   a blue-violet that belongs to no palette in this theme. Section 4 now feeds
+   Obsidian's variables from the palette as well, but a menu is worth painting
+   outright: it is the surface people see most often and the one where a
+   mismatch is most obvious. */
+.menu-item:hover {
+  background-color: var(--background-modifier-hover) !important;
+  color: var(--nx-fg-bright) !important;
+}
+.menu-item.selected,
+.menu-item.is-active {
+  background-color: color-mix(in srgb, var(--nx-accent) 20%, transparent) !important;
+  color: var(--nx-fg-bright) !important;
+}
+.menu-item.selected .menu-item-icon,
+.menu-item.is-active .menu-item-icon { color: var(--nx-accent-fg) !important; }
+.menu-item.is-disabled { opacity: 0.45; }
+.menu-item.mod-warning { color: var(--wl-color1, #ce3737) !important; }
+.menu-separator { background-color: var(--nx-border) !important; }
+
+.suggestion-item:hover,
+.suggestion-item.is-selected {
+  background-color: color-mix(in srgb, var(--nx-accent) 20%, transparent) !important;
+  color: var(--nx-fg-bright) !important;
 }
 
 /* Inline tags — CONTRAST GUARD: always a dark accent pill with light text, no
