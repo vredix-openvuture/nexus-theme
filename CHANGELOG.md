@@ -2,6 +2,50 @@
 
 Grouped by what changed for you, not by commit. Newest first.
 
+## Unreleased
+
+### Changed
+
+- **One file owns every shared number.** Radii, border width and colour, surface
+  lifts, control height, field width and spacing are declared once, in a block
+  that is identical in the theme and in the plugin. The two used to disagree —
+  the theme said a 15px container radius, the plugin fell back to 12px and 10px
+  — which is most of why the same element looked different depending on where it
+  was drawn. Every literal `border-radius` in this file is gone; the only one
+  left is `0`.
+- **Two radii, and that is all.** `--nx-radius` for anything that contains
+  something, `--nx-r-tile` for anything that is a control. A circle and a pill
+  exist as shapes, used only where the shape means something.
+
+### Changed
+
+- **The two radii are 10px and 6px**, picked from four rendered variants. The
+  theme said 15/10, but its own tablet and narrow-window blocks were already
+  overriding the container radius to 10 — so this makes every device draw the
+  same corner and deletes those two overrides rather than adding a third. A code
+  block reads as a box again instead of a lozenge. The style variants that mean
+  something by their corners — the Notion-like palette and "Almost nothing" —
+  keep theirs.
+
+### Fixed
+
+- **Code blocks looked like separate strips glued together.** In Live Preview
+  Obsidian puts `HyperMD-codeblock-bg` on every line of the block rather than on
+  a wrapper, so a radius on it rounded all ten lines of a ten-line block
+  individually and pinched the edge at every seam. The first and last lines now
+  carry the corners and the middle carries none; a single-line block still
+  rounds on all four. Multi-line quotes had exactly the same bug and the same
+  fix.
+- **The active file's background covered the explorer rail.** A full-bleed row
+  highlight reaches past the folder's left edge; both insets are now pinned so
+  it cannot.
+- **A long folder list ran out of colour.** The rail's sweep normalised over
+  seven positions, so from the eighth folder every rail was the same tone — and
+  that tone was the darkest slot in the palette. The sweep now walks ten stops
+  and turns around, repeating, so no folder is ever colourless. The cool end was
+  also lifted so it stays blue instead of going near-black.
+- Every remaining German comment translated.
+
 ## 0.7.1 — 2026-08-31
 
 ### Fixed

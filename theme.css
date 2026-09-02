@@ -21,7 +21,7 @@
  *    color8 → muted       color15 → bright
  *
  *  Layout of this file:
- *    1. GEOMETRY   (mirobo tokens: radius, gap)
+ *    1. GEOMETRY   (the shared token block: radii, border, surfaces)
  *    2. COLOURS    (wallust → --nx-*)  · dark
  *    3. COLOURS    · light
  *    4. OBSIDIAN CORE VARIABLES
@@ -33,35 +33,133 @@
 
 
 /* ============================================================================
- * 1. GEOMETRY  —  mirobo tokens (the fastest thing to turn)
+ * 1. GEOMETRY  —  the shared token block
+ * ----------------------------------------------------------------------------
+ *  Everything between the NX TOKENS markers is the SAME block as in the
+ *  plugin's src/styles/00-tokens.css, declaration for declaration. The plugin
+ *  declares it on :root, the theme on .theme-dark/.theme-light — a higher
+ *  specificity, so with Nexus active the theme's numbers win and under any
+ *  other theme the plugin still has every token it uses. Editing one without
+ *  the other is a defect, not a style opinion (.claude/token-spec.md).
+ *
+ *  TWO radii, and that is all: --nx-radius for what CONTAINS, --nx-r-tile for
+ *  what IS a control. A literal radius anywhere below is a defect; the only
+ *  permitted literal is 0.
  * ========================================================================== */
 .theme-dark,
 .theme-light {
-  --nx-radius:    15px;   /* ONE radius for ALL chips (cozy: softer)         */
-  --nx-r-tile:    10px;   /* only for small elements (tabs, file entries)    */
-  --nx-gap:       12px;   /* ONE gap between all chips                       */
-  --nx-bar-h:     38px;   /* fixed, equal height for the tab bar and icon bar */
-  --nx-tab-gap:   5px;    /* the same gap above the tabs and to the sides */
+/* >>> NX TOKENS >>> */
+  /* ── Radii · two, and that is all ───────────────────────────────────────
+     --nx-radius  what CONTAINS something: card, panel, modal, code block,
+                  callout, banner, image, popover surface.
+     --nx-r-tile  what IS a control: button, input, list row, tab, chip, tag,
+                  swatch, toggle.
+     The style variants (plain, the narrow block, the Notion palette) override
+     these two and nothing else — that is the mechanism working. */
+  --nx-radius:      10px;
+  --nx-r-tile:      6px;
 
-  /* Obsidian-Radien angleichen */
-  --radius-s: var(--nx-r-tile);
-  --radius-m: var(--nx-radius);
-  --radius-l: var(--nx-radius);
+  /* Shapes, not radii. Only where the element genuinely is one. */
+  --nx-r-circle:    50%;
+  --nx-r-pill:      999px;
+
+  /* ── Border ─────────────────────────────────────────────────────────────
+     --nx-border keeps its existing meaning: it is a COLOUR, set per palette.
+     --nx-hairline is the shorthand that replaces every written-out
+     `1px solid var(--nx-border)`. Its fallback is load-bearing: --nx-border is
+     declared by the theme, not by the plugin, and without the floor all ~110
+     `border: var(--nx-hairline)` rules would be invalid at computed-value time
+     under any other theme — the plugin would render with no borders at all.
+
+     The floor is a LITERAL and it has to be. A var() chain is substituted on
+     the element that declares it: --background-modifier-border lives on body,
+     so at :root that fallback is undefined too, the whole chain is invalid, and
+     the empty result inherits down past the point where the variable does
+     exist. Measured, not assumed. */
+  --nx-bw:          1px;
+  --nx-hairline:    var(--nx-bw) solid var(--nx-border, var(--background-modifier-border, rgba(128, 128, 128, .28)));
+  --nx-border-strong: color-mix(in srgb, var(--nx-fg, currentColor) 12%, var(--nx-border, var(--background-modifier-border, rgba(128, 128, 128, .28))));
+
+  /* ── Surfaces · lifted from the ground, never tinted ────────────────────
+     Translucent on purpose, so one token works on the editor, the sidebar and
+     a modal without knowing which ground it sits on. */
+  --nx-op-faint:    4%;
+  --nx-op-soft:     8%;
+  --nx-op-strong:   14%;
+  --nx-sf-1:        color-mix(in srgb, var(--nx-fg, currentColor) var(--nx-op-faint), transparent);
+  --nx-sf-2:        color-mix(in srgb, var(--nx-fg, currentColor) var(--nx-op-soft), transparent);
+  --nx-sf-3:        color-mix(in srgb, var(--nx-fg, currentColor) var(--nx-op-strong), transparent);
+
+  /* ── Controls · one height, one padding, one field width ────────────────
+     The review found text fields of three different widths inside a single
+     settings tab. --nx-field-w is the answer to that, everywhere. */
+  --nx-ctl-h:       30px;
+  --nx-ctl-h-sm:    24px;
+  --nx-ctl-pad-x:   10px;
+  --nx-ctl-gap:     6px;
+  --nx-field-w:     220px;
+  --nx-row-h:       34px;
+
+  /* ── Spacing · five steps, nothing between them ─────────────────────────
+     --nx-gap keeps its own meaning: the gap BETWEEN chips, which the style
+     variants turn to 0. */
+  --nx-sp-1:        4px;
+  --nx-sp-2:        8px;
+  --nx-sp-3:        12px;
+  --nx-sp-4:        18px;
+  --nx-sp-5:        28px;
+  --nx-gap:         12px;
+
+  /* ── Bars ───────────────────────────────────────────────────────────────*/
+  --nx-bar-h:       38px;
+  --nx-tab-gap:     5px;
+/* <<< NX TOKENS <<< */
+
+  /* ── Obsidian's own geometry, DERIVED from the two radii ──────────────────
+     Not tokens of their own: they are the same two numbers wearing Obsidian's
+     names. Declaring them here is what makes a style variant that changes
+     --nx-radius / --nx-r-tile move every surface Obsidian draws with it,
+     without restating a single value.
+
+     The ones that carried a literal of their own are the reason the app looked
+     like several themes at once: --input-radius was 5px (and with it every
+     native button), --search-input-radius went to a 100px pill on mobile,
+     --tag-radius and --pill-radius to 2em, --swatch-radius to 14px. */
+  --radius-s:  var(--nx-r-tile);
+  --radius-m:  var(--nx-radius);
+  --radius-l:  var(--nx-radius);
+  --radius-xl: var(--nx-radius);
+
+  --input-radius:        var(--nx-r-tile);
+  --search-input-radius: var(--nx-r-tile);
+  --input-height:        var(--nx-ctl-h);
+  --border-width:        var(--nx-bw);
+
+  /* A code block, a callout and an image CONTAIN something → --nx-radius.
+     A tag, a pill and a swatch ARE controls → --nx-r-tile. */
+  --code-radius:              var(--nx-radius);
+  --callout-radius:           var(--nx-radius);
+  --image-radius:             var(--nx-radius);
+  --mobile-sidebar-radius:    var(--nx-radius);
+  --tag-radius:               var(--nx-r-tile);
+  --pill-radius:              var(--nx-r-tile);
+  --swatch-radius:            var(--nx-r-tile);
+  --metadata-property-radius: var(--nx-r-tile);
 
   --tab-outline-width: 0;
-  --divider-width: 0px;
+  --divider-width: 0px;      /* px, not 0: it is read inside calc() */
   --divider-width-hover: 3px;
   --tab-divider-color: transparent;   /* no line between tabs */
 
   /* Tabs: pills, rounded all round — not a browser tab's hard bottom edge. */
   --tab-radius: var(--nx-r-tile);
   --tab-radius-active: var(--nx-r-tile);
-  --tab-curve: 0px;
+  --tab-curve: 0px;         /* px, not 0: it is read inside calc() */
 }
 
 
 /* ============================================================================
- * 2. FARBEN  —  wallust → --nx-*   ·  DARK
+ * 2. COLOURS  —  wallust → --nx-*   ·  DARK
  * ========================================================================== */
 .theme-dark {
   /* ── The accent is EXACTLY velumeron's (Colors.qml: bgActive = color3). That
@@ -80,18 +178,18 @@
      --nx-guard = how strongly the surfaces are lifted. */
   /* TRUE TO THE PALETTE (like velumeron): no warm brown mixed in any more.
      Surfaces follow color0. Only a NEUTRAL lift (white) raises the cards. */
-  --nx-guard:      11%;   /* Karten deutlicher vom Schreibtisch abheben (war 7% → wirkte verwaschen) */
+  --nx-guard:      11%;   /* lift the cards further off the desk (was 7% → looked washed out) */
   --nx-warm:       #f8ead2;   /* only as a soft lift tone now (barely used) */
   --nx-warm-dark:  #2a1d14;   /* Legacy var (for styles.css fallbacks), no longer used on surfaces */
-  --nx-ember:      #e0a465;   /* Legacy-Var */
-  /* Karten = color0 + neutraler Lift (≈ velumeron bgElement/color1) */
+  --nx-ember:      #e0a465;   /* legacy variable */
+  /* Cards = color0 plus a neutral lift (≈ velumeron bgElement/color1) */
   --nx-floor:      color-mix(in srgb, #ffffff var(--nx-guard), var(--wl-color0, #080409));
 
   /* Desk = color0 (velumeron's bgPrimary), with only a hint of accent. */
   --nx-desk:       color-mix(in srgb, var(--nx-accent) 5%, var(--wl-color0, #080409));
   /* Cards = warm floor plus only a HINT of accent (not a colour field) */
   --nx-chip:       color-mix(in srgb, var(--nx-accent) 4%,  var(--nx-floor)); /* Editor          */
-  --nx-chip-side:  color-mix(in srgb, var(--nx-accent) 8%,  var(--nx-floor)); /* Leisten/Sidebar */
+  --nx-chip-side:  color-mix(in srgb, var(--nx-accent) 8%,  var(--nx-floor)); /* bars / sidebar   */
   --nx-elevated:   color-mix(in srgb, var(--nx-accent) 13%, var(--nx-floor)); /* menus and inputs */
 
   /* Lines and text — more definition (the subtle borders left everything washed out). */
@@ -100,7 +198,7 @@
      (pink on Indigo & Rose, say) has too little contrast on dark cards and read
      as no border at all. color5 stays in it as the hue. */
   --nx-border:     color-mix(in srgb, var(--wl-color5, #C95E61) 30%, color-mix(in srgb, #ffffff 16%, transparent));
-  /* TEXT = warmes Off-White, hoher Kontrast auf color0. */
+  /* TEXT = a warm off-white, high contrast on color0. */
   --nx-fg:         color-mix(in srgb, var(--wl-foreground, #A7E2A6) 38%, #ffffff);
   /* Secondary text: dimmed down from the real body text, not taken from the grey
      color8 → clearly legible instead of hazy. */
@@ -148,19 +246,19 @@
      Dark lifts color0 with a warm cream; light lowers warm PAPER with a warm
      dark — not pure black, so it never turns cool or grey. */
   --nx-guard:      5%;
-  --nx-paper:      #f4ede1;                                                          /* warmes Creme-Papier */
+  --nx-paper:      #f4ede1;                                                          /* warm cream paper    */
   --nx-floor:      color-mix(in srgb, #2a2018 var(--nx-guard), var(--nx-paper));     /* warm abgesenkt */
 
   /* ── COLOUR STRENGTH of the light surfaces ── COZY: pulled back a long way. */
   --nx-desk:       color-mix(in srgb, var(--nx-accent-vivid) 26%,
                      color-mix(in srgb, #2a2018 6%, var(--nx-paper)));   /* The surface behind the cards: gentle */
   --nx-chip:       color-mix(in srgb, var(--nx-accent-vivid) 11%, var(--nx-paper));   /* Editor          */
-  --nx-chip-side:  color-mix(in srgb, var(--nx-accent-vivid) 22%, var(--nx-floor));   /* Leisten/Sidebar */
+  --nx-chip-side:  color-mix(in srgb, var(--nx-accent-vivid) 22%, var(--nx-floor));   /* bars / sidebar  */
   --nx-elevated:   color-mix(in srgb, var(--nx-accent-vivid) 8%,  var(--nx-paper));   /* menus and inputs */
 
   /* Lines and text — warm, with quiet borders. */
   --nx-border:     color-mix(in srgb, var(--nx-accent-vivid) 30%, #d8cebd);
-  --nx-fg:         #3a332c;   /* warmes Dunkelbraun-Grau */
+  --nx-fg:         #3a332c;   /* warm dark brown-grey */
   --nx-fg-muted:   #857c70;
   --nx-fg-bright:  #241d16;
   --nx-accent-fg:  color-mix(in srgb, var(--nx-accent-vivid) 62%, #201a12);
@@ -183,7 +281,7 @@
 
 
 /* ============================================================================
- * 4. OBSIDIAN-CORE-VARIABLEN  —  aus --nx-* ableiten
+ * 4. OBSIDIAN CORE VARIABLES  —  derived from --nx-*
  * ========================================================================== */
 .theme-dark,
 .theme-light {
@@ -235,6 +333,15 @@
   --background-modifier-form-field:   var(--nx-elevated);
   --text-selection: color-mix(in srgb, var(--nx-accent) 28%, transparent);
 
+  /* Obsidian draws the EDGE of a button, an input and a select with a shadow,
+     not with a border: a glossy inset highlight plus two drop shadows on the
+     desktop and `none` on mobile. That is most of why the same button looked
+     different from page to page and different again on the tablet. Replace it
+     with the one hairline — no gloss, no drop shadow, identical everywhere. */
+  --input-shadow:       inset 0 0 0 var(--nx-bw) var(--nx-border);
+  --input-shadow-hover: inset 0 0 0 var(--nx-bw) var(--background-modifier-border-hover);
+  --modal-background:   var(--nx-elevated);
+
   /* The selected row of a menu or a list. This is the blue row in the
      dropdown: the theme styled the panel and left its states to Obsidian. */
   --nav-item-background-active: color-mix(in srgb, var(--nx-accent) 18%, transparent);
@@ -271,13 +378,13 @@
   --scrollbar-thumb-bg:        color-mix(in srgb, var(--nx-fg-muted) 25%, transparent);
   --scrollbar-active-thumb-bg: var(--nx-accent);
 
-  /* Tags: heller, lesbarer Text auf dezenter Akzent-Pille */
+  /* Tags: brighter, legible text on a quiet accent chip */
   --tag-color:            var(--nx-fg-bright);
   --tag-color-hover:      var(--nx-fg-bright);
   --tag-background:       color-mix(in srgb, var(--nx-accent) 24%, transparent);
   --tag-background-hover: color-mix(in srgb, var(--nx-accent) 38%, transparent);
   --tag-border-color:     color-mix(in srgb, var(--nx-accent) 35%, transparent);
-  --tag-border-width:     1px;
+  --tag-border-width:     var(--nx-bw);
 }
 
 
@@ -349,8 +456,8 @@ body {
        top), only a dividing line. */
 .workspace-tab-header-container,
 .workspace-tab-container {
-  border: 1px solid var(--nx-border) !important;
-  background-color: var(--nx-chip) !important;          /* Editor: dezent   */
+  border: var(--nx-hairline) !important;
+  background-color: var(--nx-chip) !important;          /* editor: quiet    */
 }
 .mod-left-split .workspace-tab-header-container,
 .mod-left-split .workspace-tab-container,
@@ -364,7 +471,7 @@ body {
   height: var(--nx-bar-h) !important;
   min-height: var(--nx-bar-h) !important;
   margin: calc(var(--nx-gap) / 2) calc(var(--nx-gap) / 2) 0 !important;
-  padding: var(--nx-tab-gap) !important;   /* rundum gleicher Innenabstand */
+  padding: var(--nx-tab-gap) !important;   /* the same inset all the way round */
   display: flex !important;
   align-items: center !important;
   border-radius: var(--nx-radius) var(--nx-radius) 0 0 !important;
@@ -390,7 +497,7 @@ body {
   border-radius: var(--nx-r-tile) !important;
   margin: 0 !important;
   height: calc(var(--nx-bar-h) - 2 * var(--nx-tab-gap)) !important;
-  background-color: var(--nx-chip-side) !important;   /* solide */
+  background-color: var(--nx-chip-side) !important;   /* solid  */
 }
 .workspace-tab-header::before,
 .workspace-tab-header::after { display: none !important; }
@@ -412,7 +519,7 @@ body {
 .workspace-ribbon.mod-left,
 .side-dock-ribbon.mod-left {
   background-color: var(--nx-chip-side) !important;
-  border: 1px solid var(--nx-border) !important;
+  border: var(--nx-hairline) !important;
   border-radius: var(--nx-radius) !important;
   margin: calc(var(--nx-gap) / 2) !important;
   padding: 6px 0 !important;
@@ -433,7 +540,7 @@ body {
 .workspace-ribbon.mod-left .side-dock-ribbon-actions {
   margin-top: 0 !important;
   padding: 0 !important;                 /* no empty space left or right */
-  align-items: center !important;        /* Icons mittig, symmetrisch */
+  align-items: center !important;        /* icons centred, symmetrical */
 }
 .workspace-ribbon.mod-left .side-dock-actions .clickable-icon,
 .workspace-ribbon.mod-left .side-dock-ribbon-action {
@@ -451,7 +558,7 @@ body {
   width: auto !important;
   margin: calc(var(--nx-gap) / 2) !important;
   padding: 6px 10px !important;
-  border: 1px solid var(--nx-border) !important;
+  border: var(--nx-hairline) !important;
   border-radius: var(--nx-radius) !important;
   box-shadow: var(--nx-chip-shadow) !important;
   background-color: var(--nx-chip-side) !important;
@@ -470,7 +577,7 @@ body {
 .prompt,
 .popover.hover-popover {
   border-radius: var(--nx-radius) !important;
-  border: 1px solid var(--nx-border);
+  border: var(--nx-hairline);
   box-shadow: var(--nx-chip-shadow);
   background-color: var(--nx-elevated);
 }
@@ -502,6 +609,40 @@ body {
 .suggestion-item.is-selected {
   background-color: color-mix(in srgb, var(--nx-accent) 20%, transparent) !important;
   color: var(--nx-fg-bright) !important;
+}
+
+/* ── Side-panel view chrome ─────────────────────────────────────────────────
+   The pickers in a sidebar: the header of "outgoing links" or "tab view", the
+   button row under it, and the select that changes what the pane shows. They
+   were the last place where a control still wore Obsidian's own geometry, so
+   the same button looked different depending on which pane it sat in. Nothing
+   here sets a number; it all reads the tokens the rest of the theme reads. */
+.view-header .clickable-icon,
+.nav-header .clickable-icon,
+.nav-buttons-container .clickable-icon,
+.workspace-tab-header-container .clickable-icon {
+  border-radius: var(--nx-r-tile);
+  box-shadow: none;
+}
+.view-header .clickable-icon:hover,
+.nav-header .clickable-icon:hover,
+.nav-buttons-container .clickable-icon:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--nx-fg-bright);
+}
+.nav-header {
+  background: transparent;
+  border-bottom: var(--nx-hairline);
+}
+
+/* A select IS a menu that has not opened yet, so it gets the menu's surface,
+   line and radius. */
+select,
+select.dropdown,
+.dropdown {
+  background-color: var(--nx-elevated);
+  border-radius: var(--nx-r-tile);
+  color: var(--nx-fg);
 }
 
 /* Inline tags — CONTRAST GUARD: always a dark accent pill with light text, no
@@ -547,7 +688,7 @@ body {
   margin-bottom: 8px !important;
 }
 
-/* Bestimmte Systemordner farblich hervorheben (Name + Kind-Elemente) */
+/* Give certain system folders a colour of their own (name plus children) */
 div[data-path*='attachments'],
 div[data-path*='attachments'] + div.nav-folder-children,
 div[data-path*='archive'],
@@ -572,31 +713,44 @@ div[data-path*='scribbles'] + div.nav-folder-children {
    hands the accent back to the one thing that genuinely needs it, which is the
    file you are looking at.
 
-   Colour still groups. Each rail takes its tone from the folder's position
-   (--i), warm Ember at the top of the list tipping to cool Prussian at the
-   foot — the same identity the blocks carried, drawn as a line instead of a
-   field. --i is set with :nth-child; spacers and files skip numbers, but the
-   order stays monotonic, so it always reads as a gradient.
+   Colour still groups. Each rail takes its tone from the folder's position,
+   warm Ember at the top of the list tipping to cool Prussian and back — the
+   same identity the blocks carried, drawn as a line instead of a field.
 
    The control is --nx-fld-intensity (a plugin slider): here it sets how present
    the rail is, from a hairline hint to a firm mark. */
 body.nx-explorer-folders .nav-files-container
   .tree-item.nav-folder:not(.tree-item .tree-item) {
-  --i: 6;
-  /* How far down the list this folder sits, 0 → 1.
-     Spread over SEVEN steps, not over the sixteen :nth-child can reach: a vault
-     has four to eight top-level folders, and a sweep sized for sixteen leaves a
-     real one entirely in the warm end — the gradient exists but nobody sees it.
-     Anything past the eighth folder stays at the cool end, which is where the
-     bottom of a long list belongs anyway. */
-  --fld-pos: min(1, calc(var(--i, 0) / 7));
-  /* Ember → Prussian across the list. */
+  /* Where this folder sits in the sweep, 0 → 1. A PING-PONG over ten stops:
+     positions 1…10 walk 0 → 1, positions 11…19 walk back 1 → 0, then it starts
+     over. Set per position by the :nth-child rules below.
+
+     A monotonic 0 → 1 ramp was the bug the user actually saw: past the eighth
+     folder every rail was the same saturated cool tone, and that tone is the
+     darkest colour in the palette, so the bottom half of a long list read as
+     "no colour at all". A sweep that turns around cannot run out — folder 12
+     is as warm as folder 8 and no folder is ever colourless.
+
+     No mod(): Obsidian on Android renders in the system WebView and it is not
+     something to bet a visible feature on. Twenty-four plain rules cost nothing
+     and work everywhere. */
+  --fld-pos: 0;
+  /* The cool end of the sweep. Straight --wl-color5 is a deep Prussian, the
+     darkest slot in the palette; at 62% over a card it measured
+     rgb(46,52,63) against a rgb(77,49,52) ground — a difference you cannot see.
+     It is lifted the same way section 13 lifts the graph's hub colour: onto
+     color6, the LIGHT Prussian of the same family, so it stays blue instead of
+     going grey, and then a little further toward the bright ink. */
+  --fld-cool-hue: color-mix(in srgb, var(--wl-color5, #1b3854) 35%, var(--wl-color6, #3d6d8c));
+  --fld-cool:     color-mix(in srgb, var(--fld-cool-hue) 72%, var(--nx-fg-bright, #ffe7dc));
+  /* Ember → Prussian and back across the list. */
   --fld-hue: color-mix(in srgb,
-    var(--wl-color5, #1b3854) calc(var(--fld-pos) * 100%),
+    var(--fld-cool) calc(var(--fld-pos) * 100%),
     var(--nx-accent, #fb6734));
   /* The slider sets presence, not fill: even at its lowest the rail is visible,
-     because an invisible rail is the same as no rail. */
-  --fld-acc: clamp(45%, calc(var(--nx-fld-intensity, 22%) + 40%), 100%);
+     because an invisible rail is the same as no rail. The floor was 45%, which
+     was not enough to carry the cool half of the sweep. */
+  --fld-acc: clamp(58%, calc(var(--nx-fld-intensity, 22%) + 50%), 100%);
   margin: 1px 8px 6px;
   padding: 0 0 0 9px;
   border: none;
@@ -605,22 +759,50 @@ body.nx-explorer-folders .nav-files-container
   background: none;
 }
 
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(1)  { --i: 0;  }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(2)  { --i: 1;  }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(3)  { --i: 2;  }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(4)  { --i: 3;  }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(5)  { --i: 4;  }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(6)  { --i: 5;  }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(7)  { --i: 6;  }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(8)  { --i: 7;  }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(9)  { --i: 8;  }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(10) { --i: 9;  }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(11) { --i: 10; }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(12) { --i: 11; }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(13) { --i: 12; }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(14) { --i: 13; }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(15) { --i: 14; }
-body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(16) { --i: 15; }
+/* The rail belongs to the FOLDER, and nothing inside the folder may draw over
+   it: a row whose inline-start margin goes negative — which is how Obsidian
+   builds a full-bleed row highlight, and what a narrower
+   --nav-item-children-margin-start produces — puts the active file's rounded
+   pill straight on top of the rail. Pinning both to a non-negative floor makes
+   that impossible without moving anything at its current values. */
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) .tree-item-children {
+  margin-inline-start: max(0px, var(--nav-item-children-margin-start, 12px));
+}
+body.nx-explorer-folders .nav-files-container
+  .tree-item.nav-folder:not(.tree-item .tree-item) .nav-folder-children .tree-item-self {
+  margin-inline-start: 4px;   /* the same inset .nav-file-title already had */
+}
+
+/* The triangle wave, written out. 1 → 10 walks to the cool end, 11 → 19
+   walks back to the warm one, and 19 is the same tone as 1, so the next
+   ten repeat it. Twenty-four positions cover any sidebar worth scrolling;
+   past that the base rule's 0 takes over, which is the warm end and not a
+   colourless one. */
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(1)            { --fld-pos: 0; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(2)            { --fld-pos: 0.1111; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(3)            { --fld-pos: 0.2222; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(4)            { --fld-pos: 0.3333; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(5)            { --fld-pos: 0.4444; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(6)            { --fld-pos: 0.5556; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(7)            { --fld-pos: 0.6667; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(8)            { --fld-pos: 0.7778; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(9)            { --fld-pos: 0.8889; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(10)           { --fld-pos: 1; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(11)           { --fld-pos: 0.8889; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(12)           { --fld-pos: 0.7778; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(13)           { --fld-pos: 0.6667; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(14)           { --fld-pos: 0.5556; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(15)           { --fld-pos: 0.4444; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(16)           { --fld-pos: 0.3333; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(17)           { --fld-pos: 0.2222; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(18)           { --fld-pos: 0.1111; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(19)           { --fld-pos: 0; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(20)           { --fld-pos: 0.1111; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(21)           { --fld-pos: 0.2222; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(22)           { --fld-pos: 0.3333; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(23)           { --fld-pos: 0.4444; }
+body.nx-explorer-folders .nav-files-container .tree-item.nav-folder:not(.tree-item .tree-item):nth-child(24)           { --fld-pos: 0.5556; }
 
 /* Parent title: transparent, because the block carries the colour. It is the
    head of the block. Flexbox, so the collapse arrow comes INTO the bar —
@@ -755,13 +937,13 @@ body.nx-explorer-folders .nav-files-container
     var(--nx-mark) 98.2%,
     transparent 99.6%);
   color: inherit;
-  border-radius: 1px;
+  border-radius: 0;            /* a stroke, not a chip — see the note above */
   padding: .04em .1em;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
 
-/* ── Listen-Marker im Akzent (Reading + Live-Preview) ── */
+/* ── List markers in the accent (reading view + live preview) ── */
 .markdown-rendered ul > li::marker { color: var(--nx-accent-fg); }
 .markdown-rendered ol > li::marker { color: var(--nx-accent-fg); font-weight: 600; }
 .cm-editor .cm-formatting-list     { color: var(--nx-accent-fg); }
@@ -791,24 +973,78 @@ body.nx-explorer-folders .nav-files-container
   border-radius: var(--nx-r-tile);
   padding: .12em .4em;
 }
-.markdown-rendered pre,
-.cm-editor .HyperMD-codeblock-bg {
+.markdown-rendered pre { border-radius: var(--nx-radius); }
+
+/* ── A code block in live preview is ONE box, not a stack of strips ─────────
+   CodeMirror paints a fenced block as one .cm-line per row and puts
+   .HyperMD-codeblock-bg on EVERY one of them. A radius on that class therefore
+   rounds all four corners of all ten rows, and a ten-line block came out as ten
+   separately rounded bars butted together — the "glued from single lines" look.
+   Only the first and the last row may round, and only on their own side. It is
+   the same shape the tab card is built from in section 6b.
+   Obsidian marks the two ends -begin-bg / -end-bg; the -begin / -end spellings
+   sit on the same two elements and are matched as well, so the rule holds
+   whichever one an Obsidian version emits. A block of a SINGLE line carries
+   both marks and rounds on all four corners (the last rule, and it is more
+   specific than the two above it, so it wins). */
+.cm-editor .HyperMD-codeblock-bg { border-radius: 0; }
+.cm-editor .HyperMD-codeblock-begin-bg,
+.cm-editor .HyperMD-codeblock-begin {
+  border-radius: var(--nx-radius) var(--nx-radius) 0 0;
+}
+.cm-editor .HyperMD-codeblock-end-bg,
+.cm-editor .HyperMD-codeblock-end {
+  border-radius: 0 0 var(--nx-radius) var(--nx-radius);
+}
+.cm-editor .HyperMD-codeblock-begin-bg.HyperMD-codeblock-end-bg,
+.cm-editor .HyperMD-codeblock-begin.HyperMD-codeblock-end {
   border-radius: var(--nx-radius);
 }
 
-/* Blockquotes: an accent bar plus a faint tint, italic and muted → recognisable
-   as a quotation at once without being loud. The tint and padding apply in
-   reading view only, so the live-preview editor's line layout does not jump. */
-.markdown-rendered blockquote,
-.cm-editor .cm-blockquote {
+/* Blockquotes: an accent rail plus a faint tint, italic and muted → recognisable
+   as a quotation at once without being loud. */
+.markdown-rendered blockquote {
   border-left: 3px solid var(--nx-accent);
   border-radius: 0 var(--nx-radius) var(--nx-radius) 0;
-}
-.markdown-rendered blockquote {
   background: color-mix(in srgb, var(--nx-accent) 6%, transparent);
   padding: .5em .9em;
   color: var(--nx-fg-muted);
   font-style: italic;
+}
+
+/* Live preview draws a quote per LINE (.HyperMD-quote) and its rail as a
+   :before, so it reads these variables instead of the rule above. Setting them
+   is what makes the editor and reading view the same quotation; the padding is
+   deliberately NOT repeated, so the editor's line layout does not jump. */
+.markdown-source-view.mod-cm6 {
+  --blockquote-border-thickness: 3px;
+  --blockquote-border-color: var(--nx-accent);
+  --blockquote-background-color: color-mix(in srgb, var(--nx-accent) 6%, transparent);
+}
+/* …and a per-line class has the same seam as the code block above: only the
+   first and the last line of a RUN may round, and only on the outer side (the
+   rail keeps the left edge square). .cm-blockquote is the older spelling and is
+   kept for an Obsidian that still emits it. Split into separate rules on
+   purpose: where :has() is missing, each run simply stays square — which is
+   still ONE shape — instead of the whole block dropping out. */
+.cm-editor .HyperMD-quote,
+.cm-editor .cm-blockquote { border-radius: 0; }
+.cm-editor .cm-content > :not(.HyperMD-quote) + .HyperMD-quote,
+.cm-editor .cm-content > .HyperMD-quote:first-child {
+  border-radius: 0 var(--nx-radius) 0 0;
+}
+.cm-editor .cm-content > .HyperMD-quote:last-child {
+  border-radius: 0 0 var(--nx-radius) 0;
+}
+.cm-editor .cm-content > .HyperMD-quote:has(+ :not(.HyperMD-quote)) {
+  border-radius: 0 0 var(--nx-radius) 0;
+}
+/* A quote of a single line is both ends at once. */
+.cm-editor .cm-content > .HyperMD-quote:first-child:last-child,
+.cm-editor .cm-content > .HyperMD-quote:first-child:has(+ :not(.HyperMD-quote)),
+.cm-editor .cm-content > :not(.HyperMD-quote) + .HyperMD-quote:last-child,
+.cm-editor .cm-content > :not(.HyperMD-quote) + .HyperMD-quote:has(+ :not(.HyperMD-quote)) {
+  border-radius: 0 var(--nx-radius) var(--nx-radius) 0;
 }
 
 /* Tables: cleanly rounded, without the corners cutting off the frame. The frame
@@ -816,15 +1052,15 @@ body.nx-explorer-folders .nav-files-container
 .markdown-rendered table {
   border-collapse: separate;
   border-spacing: 0;
-  border: 1px solid var(--nx-border);
+  border: var(--nx-hairline);
   border-radius: var(--nx-radius);
   overflow: hidden;
 }
 .markdown-rendered th,
 .markdown-rendered td {
   border: none;
-  border-bottom: 1px solid var(--nx-border);
-  border-right: 1px solid var(--nx-border);
+  border-bottom: var(--nx-hairline);
+  border-right: var(--nx-hairline);
 }
 .markdown-rendered th:last-child,
 .markdown-rendered td:last-child { border-right: none; }
@@ -882,13 +1118,13 @@ body.theme-light .cm-editor .cm-content .cm-header-5 { color: var(--nx-fg-muted)
 body.theme-dark  .cm-editor .cm-content .cm-header-6,
 body.theme-light .cm-editor .cm-content .cm-header-6 { color: color-mix(in srgb, var(--nx-fg-muted) 80%, transparent) !important; font-weight: 600; letter-spacing: .08em; }
 
-/* 9d. Fettschrift in Akzent */
+/* 9d. Bold type in the accent */
 .cm-strong {
   color: var(--interactive-accent) !important;
   font-weight: bold !important;
 }
 
-/* 9e. Einzugs-Hilfslinien in Akzent */
+/* 9e. Indent guides in the accent */
 .cm-indent::before {
   border-right-color: var(--interactive-accent) !important;
 }
@@ -919,8 +1155,8 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
 .metadata-property {
   background-color: transparent !important;
   border: none !important;
-  border-radius: var(--radius-s, 6px);
-  min-height: 30px;
+  border-radius: var(--nx-r-tile);
+  min-height: var(--nx-ctl-h);
   padding: 2px 6px;
   margin: 0;
   align-items: center;
@@ -959,12 +1195,12 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
 .metadata-property:hover .metadata-property-icon { opacity: 0.8; }
 .metadata-property-value { padding-left: 2px; }
 
-/* 10d. Multi-Select Tags: dezente, neutral-graue Pills */
+/* 10d. Multi-select tags: quiet, neutral grey chips */
 .multi-select-pill {
   background-color: color-mix(in srgb, var(--text-normal) 11%, transparent) !important;
   color: var(--text-normal) !important;
   border: none !important;
-  border-radius: 4px !important;
+  border-radius: var(--nx-r-tile) !important;
   padding: 1px 8px !important;
   font-size: 0.82em;
   height: auto;
@@ -983,15 +1219,15 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   margin-top: 4px;
   padding: 2px 6px;
   border: none !important;
-  border-radius: var(--radius-s, 6px);
+  border-radius: var(--nx-r-tile);
   font-size: 0.8em;
   transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
-/* Property-Liste gehovert → Button hebt sich sanft ab */
+/* The property list hovered → the button lifts gently */
 .metadata-container:hover .metadata-add-button.text-icon-button {
   opacity: 0.85;
 }
-/* Button direkt gehovert → voll sichtbar */
+/* The button itself hovered → fully visible */
 .metadata-add-button.text-icon-button:hover {
   opacity: 1 !important;
   color: var(--text-normal);
@@ -1014,7 +1250,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
 
 .is-mobile .metadata-container { width: 100%; }
 
-/* 10f. Side-Panel (Properties-View): gestapeltes, schmales Layout */
+/* 10f. Side panel (properties view): a stacked, narrow layout */
 .workspace-leaf-content[data-type="file-properties"] .metadata-container {
   width: 100%;
   margin: 0;
@@ -1053,7 +1289,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   position: relative !important;
 }
 
-/* [x] erledigt */
+/* [x] done */
 .task-list-item[data-task="x"] .task-list-item-checkbox {
   background-color: var(--color-green) !important;
   border-color: var(--color-green) !important;
@@ -1063,7 +1299,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   text-decoration: line-through !important;
 }
 
-/* [!] Warnung */
+/* [!] warning */
 .task-list-item[data-task="!"] .task-list-item-checkbox {
   background-color: var(--color-orange) !important;
   border-color: var(--color-orange) !important;
@@ -1083,7 +1319,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   border-color: var(--color-blue) !important;
 }
 
-/* [-] abgebrochen / gestrichen */
+/* [-] cancelled / struck out */
 .task-list-item[data-task="-"] .task-list-item-checkbox {
   background-color: var(--text-muted) !important;
   border-color: var(--text-muted) !important;
@@ -1093,7 +1329,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   text-decoration: line-through !important;
 }
 
-/* [?] Frage / unklar */
+/* [?] question / unclear */
 .task-list-item[data-task="?"] .task-list-item-checkbox {
   background-color: var(--color-purple) !important;
   border-color: var(--color-purple) !important;
@@ -1107,7 +1343,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   font-size: 0.85em !important; line-height: 1 !important;
 }
 
-/* [>] weitergeleitet / delegiert */
+/* [>] forwarded / delegated */
 .task-list-item[data-task=">"] .task-list-item-checkbox {
   background-color: var(--color-cyan) !important;
   border-color: var(--color-cyan) !important;
@@ -1147,15 +1383,15 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   background-color: color-mix(in srgb,
     var(--nx-callout-c, var(--callout-color)) var(--nx-callout-tint), var(--background-primary));
   border: none;
-  border-radius: 20px !important;
+  border-radius: var(--nx-radius) !important;
 }
 /* Live preview: the hover and selection frame Obsidian puts around the callout
    embed block otherwise uses the default radius → a visible mismatch against the
-   20px callout. Match the radius (and the rounded hover background) to it. */
+   callout. Match the radius (and the rounded hover background) to it. */
 .markdown-source-view.mod-cm6 .cm-embed-block.cm-callout,
 .markdown-source-view.mod-cm6 .cm-embed-block:has(> .callout),
 .markdown-source-view.mod-cm6 .cm-embed-block:has(> .callout):hover {
-  border-radius: 20px !important;
+  border-radius: var(--nx-radius) !important;
 }
 .callout-title {
   /* em, not rem: inside a note with its own font size (handwritten/mono) a rem
@@ -1165,7 +1401,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
   font-weight: 700;
 }
 
-/* Verschachtelte Callouts */
+/* Nested callouts */
 .callout .callout .callout-title {
   font-size: 1rem;
   font-weight: 500;
@@ -1173,7 +1409,7 @@ body .cm-editor .cm-lineNumbers .cm-gutterElement {
 }
 .callout .callout {
   font-size: 1rem;
-  border-radius: 24px;
+  border-radius: var(--nx-radius);
   background-color: var(--background-primary) !important;
   margin: 20px 0 20px 0 !important;
 }
@@ -1235,7 +1471,7 @@ body .graph-view.color-fill-highlight  { color: color-mix(in srgb, var(--wl-colo
 body .graph-view.color-fill-focused    { color: color-mix(in srgb, var(--wl-color3, #fb6734) 70%, var(--nx-fg-bright, #ffffff)) !important; }
 body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, #e9e7f4) 88%, var(--wl-color3, #fb6734)) !important; }
 
-/* Sternenkarten-Hintergrund (Dark) */
+/* Star-chart background (dark) */
 .theme-dark .workspace-leaf-content[data-type="graph"] .view-content,
 .theme-dark .workspace-leaf-content[data-type="localgraph"] .view-content {
   background-image:
@@ -1252,7 +1488,7 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
   background-repeat: no-repeat;
 }
 
-/* Sternenkarten-Hintergrund (Light) */
+/* Star-chart background (light) */
 .theme-light .workspace-leaf-content[data-type="graph"] .view-content,
 .theme-light .workspace-leaf-content[data-type="localgraph"] .view-content {
   background-image:
@@ -1293,19 +1529,19 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
   background-color: transparent;
 }
 .mcm-column-parent-container {
-  border: 2px solid;
-  border-radius: 0px;
+  border: 2px solid;          /* a transparent spacer, not a line: it reserves
+                                 the room the selected-column border needs */
+  border-radius: 0;
   border-color: transparent;
   margin: 1px;
 }
 .mcm-column-div,
 .mcm-column-border {
-  border: 1px solid;
-  border-color: color-mix(in srgb, transparent 60%, var(--text-accent) 40%);
-  margin: 0px;
+  border: var(--nx-bw) solid color-mix(in srgb, transparent 60%, var(--text-accent) 40%);
+  margin: 0;
   background-color: transparent;
   padding: 20px;
-  border-radius: 0px;
+  border-radius: var(--nx-radius);
   align-content: center;
 }
 .mcm-region-shadow { background-color: transparent; }
@@ -1370,21 +1606,17 @@ body .graph-view.color-text            { color: color-mix(in srgb, var(--nx-fg, 
  *     instead of looking squeezed.
  * ========================================================================== */
 
-/* Phone (Obsidian sets .is-phone): more room for what matters, and softer edges,
-   which suit small surfaces. */
-.is-phone {
-  --nx-gap: 8px;
-  --nx-radius: 12px;
-  --nx-r-tile: 8px;
-}
+/* The phone's own geometry is NOT set here. Section 23 sets .is-phone at the
+   same specificity and later in the file, so a second block here was dead the
+   moment it was written and only made the two disagree — 12px in one place and
+   0px in the other, for the same device. One device, one answer, and it lives
+   with the rest of the device policy in section 23.
 
-/* A narrow window on the desktop (a vertical split, say) gets the same
-   tightening — it reacts to the window width, not only to the device. */
+   A narrow window on the desktop (a vertical split, say) does get the softer
+   edges — it reacts to the window width, not to the device. */
 @media (max-width: 620px) {
   body {
     --nx-gap: 8px;
-    --nx-radius: 12px;
-    --nx-r-tile: 8px;
   }
 }
 
@@ -1446,12 +1678,12 @@ body.nx-blocked.theme-dark {
      a plum/wine undertone rather than brown. A narrow brightness band reads soft. */
   --nx-desk:        #1b1018;   /* the deepest ground (aubergine black)   */
   --nx-chip:        #221722;   /* editor — a quiet plum reading surface  */
-  --nx-floor:       #2a1b27;   /* Karten-Basis                          */
+  --nx-floor:       #2a1b27;   /* card base                             */
   --nx-chip-side:   #2a1b27;   /* cards / sidebars / dock (ONE colour)   */
   --nx-elevated:    #33253a;   /* menus / inputs / hover                */
-  --nx-border:      rgba(232, 220, 236, 0.07);   /* weiche Haarlinie    */
+  --nx-border:      rgba(232, 220, 236, 0.07);   /* a soft hairline     */
 
-  --nx-accent:      #db6a4b;   /* warmes Coral — Tint/aktiv (sparsam)   */
+  --nx-accent:      #db6a4b;   /* warm coral — tint / active (sparing)  */
   --nx-accent-fg:   #e5876a;   /* text: links, headings, icons          */
   --nx-mark:        color-mix(in srgb, #db6a4b 26%, transparent);
 
@@ -1540,19 +1772,19 @@ body.nx-blocked.theme-dark .nx-home-card .nx-home-card-icon {
  * ========================================================================== */
 
 body.nx-style-plain {
-  /* ── Form ── */
-  --nx-radius:  4px;
-  --nx-r-tile:  4px;
-  --nx-gap:     0px;
+  /* ── Form ──
+     The style turns the SAME two radii down and nothing else. Obsidian's
+     --radius-*, --tab-radius, --input-radius and the rest are derived from
+     these two in section 1, so they follow on their own; restating them here
+     is what used to leave a Notion menu at 6px beside a Notion button at 4px
+     beside a Notion row at 3px. */
+  --nx-radius:  6px;   /* what CONTAINS: menu, modal, code block, callout */
+  --nx-r-tile:  3px;   /* what IS a control: tab, row, tag, input, button */
+  --nx-gap:     0px;   /* px, not 0: --nx-gap is read inside calc() */
   --nx-tab-gap: 4px;
   --nx-bar-h:   36px;
-  --radius-s: 3px;
-  --radius-m: 4px;
-  --radius-l: 6px;
   --nx-chip-shadow: none;
-  --tab-radius: 4px;
-  --tab-radius-active: 4px;
-  --divider-width: 1px;
+  --divider-width: var(--nx-bw);
 
   /* ── Type: Notion's own stack, for the UI AND the text ── */
   --font-text-theme: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -1594,6 +1826,7 @@ body.nx-style-plain {
   --text-selection: color-mix(in srgb, var(--nx-accent) 28%, transparent);
   --blockquote-border-thickness: 3px;
   --blockquote-border-color: color-mix(in srgb, var(--nx-fg) 40%, transparent);
+  --blockquote-background-color: transparent;   /* flat: the rail is the quote */
   --nav-item-size: 14px;
 }
 
@@ -1606,7 +1839,7 @@ body.nx-style-plain .horizontal-main-container,
 body.nx-style-plain .titlebar,
 body.nx-style-plain .status-bar { background-color: var(--nx-chip) !important; }
 body.nx-style-plain .status-bar {
-  border-top: 1px solid var(--nx-border) !important;
+  border-top: var(--nx-hairline) !important;
   font-size: 12px;
 }
 
@@ -1624,10 +1857,10 @@ body.nx-style-plain .mod-right-split .workspace-tab-header-container,
 body.nx-style-plain .mod-right-split .workspace-tab-container {
   background-color: var(--nx-chip-side) !important;
 }
-body.nx-style-plain .mod-left-split { border-right: 1px solid var(--nx-border) !important; }
-body.nx-style-plain .mod-right-split { border-left: 1px solid var(--nx-border) !important; }
+body.nx-style-plain .mod-left-split { border-right: var(--nx-hairline) !important; }
+body.nx-style-plain .mod-right-split { border-left: var(--nx-hairline) !important; }
 body.nx-style-plain .mod-root .workspace-tab-header-container {
-  border-bottom: 1px solid var(--nx-border) !important;
+  border-bottom: var(--nx-hairline) !important;
   padding-inline: 6px !important;
 }
 
@@ -1636,7 +1869,7 @@ body.nx-style-plain .mod-root .workspace-tab-header-container {
    specificity through source order — which is why this section is last.) */
 body.nx-style-plain .workspace-tab-header {
   background-color: transparent !important;
-  border-radius: 4px !important;
+  border-radius: var(--nx-r-tile) !important;
 }
 body.nx-style-plain .workspace-tab-header-inner-title { font-size: 14px; }
 body.nx-style-plain .workspace-split.mod-root .workspace-tab-header.is-active {
@@ -1651,7 +1884,7 @@ body.nx-style-plain .workspace-ribbon.mod-left,
 body.nx-style-plain .side-dock-ribbon.mod-left {
   margin: 0 !important;
   border: none !important;
-  border-right: 1px solid var(--nx-border) !important;
+  border-right: var(--nx-hairline) !important;
   border-radius: 0 !important;
   background-color: var(--nx-chip-side) !important;
   box-shadow: none !important;
@@ -1659,7 +1892,7 @@ body.nx-style-plain .side-dock-ribbon.mod-left {
 body.nx-style-plain .workspace-sidedock-vault-profile {
   margin: 0 !important;
   border: none !important;
-  border-bottom: 1px solid var(--nx-border) !important;
+  border-bottom: var(--nx-hairline) !important;
   border-radius: 0 !important;
   background-color: transparent !important;
   font-size: 14px;
@@ -1680,7 +1913,7 @@ body.nx-style-plain.nx-blocked.theme-dark.nx-explorer-folders .nav-files-contain
 body.nx-style-plain .nav-files-container { margin-top: 4px !important; padding: 0 4px; }
 body.nx-style-plain .nav-file-title,
 body.nx-style-plain .nav-folder-title {
-  border-radius: 3px;
+  border-radius: var(--nx-r-tile);
   margin-inline: 0;
   padding: 3px 8px;
   font-size: 14px;
@@ -1750,7 +1983,7 @@ body.nx-style-plain .cm-s-obsidian .cm-line.HyperMD-header-1 { padding-top: 1.9e
 body.nx-style-plain .cm-s-obsidian .cm-line.HyperMD-header:first-child { padding-top: 0; }
 body.nx-style-plain .inline-title { margin-bottom: 6px; letter-spacing: -0.02em; }
 
-/* Listen: eng, kleine Marker in Textfarbe. */
+/* Lists: tight, small markers in the text colour. */
 body.nx-style-plain .markdown-rendered ul,
 body.nx-style-plain .markdown-rendered ol { margin: 1px 0; padding-inline-start: 1.6em; }
 body.nx-style-plain .markdown-rendered li { padding: 1px 0; }
@@ -1773,7 +2006,7 @@ body.nx-style-plain .cm-editor .cm-hmd-internal-link {
 body.nx-style-plain .markdown-rendered a:not(.tag):hover {
   text-decoration-color: currentColor;
   background: color-mix(in srgb, var(--nx-fg) 7%, transparent);
-  border-radius: 2px;
+  border-radius: var(--nx-r-tile);
 }
 body.nx-style-plain .markdown-rendered a.is-unresolved,
 body.nx-style-plain .cm-editor .is-unresolved {
@@ -1786,7 +2019,7 @@ body.nx-style-plain .cm-editor .cm-hashtag {
   color: var(--nx-fg-muted) !important;
   background: var(--nx-surface-2) !important;
   border: none !important;
-  border-radius: 3px;
+  border-radius: var(--nx-r-tile);
   padding: 1px 6px;
   font-size: .85em;
   text-decoration: none;
@@ -1799,13 +2032,15 @@ body.nx-style-plain .cm-editor .cm-inline-code {
   background-color: var(--nx-surface-2);
   font-size: 85%;
   padding: .2em .4em;
-  border-radius: 3px;
+  border-radius: var(--nx-r-tile);
 }
+/* The radius is NOT restated here: the seam rules in section 8 already read
+   --nx-radius, which this style has turned down to 6px. Restating it was what
+   papered over the same ten-strips bug with a smaller radius. */
 body.nx-style-plain .markdown-rendered pre,
 body.nx-style-plain .cm-editor .HyperMD-codeblock-bg {
   background-color: var(--nx-surface-2);
   border: none;
-  border-radius: 4px;
   font-size: 85%;
 }
 body.nx-style-plain .markdown-rendered pre > code { font-size: 1em; }
@@ -1820,6 +2055,14 @@ body.nx-style-plain .markdown-rendered blockquote,
 body.nx-style-plain .cm-editor .cm-blockquote {
   border-left: 3px solid color-mix(in srgb, var(--nx-fg) 40%, transparent);
   border-radius: 0;
+}
+/* Section 8 sets the live-preview quote variables on .markdown-source-view
+   ITSELF, so a value on <body> is never read there — the same trap as the
+   heading tokens above. Restate them on the same element: in this style a quote
+   is a grey rail and nothing else. */
+body.nx-style-plain .markdown-source-view.mod-cm6 {
+  --blockquote-border-color: color-mix(in srgb, var(--nx-fg) 40%, transparent);
+  --blockquote-background-color: transparent;
 }
 body.nx-style-plain .markdown-rendered blockquote {
   background: transparent;
@@ -1838,7 +2081,7 @@ body.nx-style-plain .markdown-rendered .footnote-ref a {
 body.nx-style-plain .markdown-rendered mark,
 body.nx-style-plain .cm-editor .cm-highlight {
   background: color-mix(in srgb, var(--nx-accent) 26%, transparent);
-  border-radius: 2px;
+  border-radius: 0;            /* a stroke, not a chip (section 8) */
   padding: .1em .15em;
 }
 
@@ -1846,7 +2089,7 @@ body.nx-style-plain .cm-editor .cm-highlight {
    quieter — no frame and no edge, the colour lives in the surface. */
 body.nx-style-plain .callout {
   --nx-callout-tint: 11%;
-  border-radius: 4px !important;
+  border-radius: var(--nx-radius) !important;
   border: none !important;
   box-shadow: none !important;
   padding: 14px 16px !important;
@@ -1869,7 +2112,7 @@ body.nx-style-plain .markdown-rendered table {
 }
 body.nx-style-plain .markdown-rendered th,
 body.nx-style-plain .markdown-rendered td {
-  border: 1px solid var(--nx-border);
+  border: var(--nx-hairline);
   padding: 7px 9px;
 }
 body.nx-style-plain .markdown-rendered th {
@@ -1878,11 +2121,11 @@ body.nx-style-plain .markdown-rendered th {
   color: var(--nx-fg-muted);
 }
 
-/* Aufgaben: Notions blaue Box, ruhiger Text danach. */
+/* Tasks: Notion's blue box, quiet text after it. */
 body.nx-style-plain .markdown-rendered input[type="checkbox"],
 body.nx-style-plain .cm-editor input[type="checkbox"] {
-  border-radius: 2px;
-  border-width: 1.4px;
+  border-radius: var(--nx-r-tile);
+  border-width: var(--nx-bw);
 }
 
 /* Menus, modals and inputs: a thin line, barely any radius, no large shadow. */
@@ -1890,19 +2133,19 @@ body.nx-style-plain .menu,
 body.nx-style-plain .modal,
 body.nx-style-plain .suggestion-container,
 body.nx-style-plain .prompt {
-  border-radius: 6px !important;
-  border: 1px solid var(--nx-border) !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, .14) !important;
+  border-radius: var(--nx-radius) !important;
+  border: var(--nx-hairline) !important;
+  box-shadow: var(--nx-chip-shadow) !important;
   background-color: var(--nx-elevated) !important;
 }
-body.nx-style-plain .menu-item { border-radius: 3px; font-size: 14px; }
+body.nx-style-plain .menu-item { border-radius: var(--nx-r-tile); font-size: 14px; }
 body.nx-style-plain input[type="text"],
 body.nx-style-plain input[type="search"],
 body.nx-style-plain input[type="number"],
 body.nx-style-plain textarea,
 body.nx-style-plain select,
 body.nx-style-plain button {
-  border-radius: 4px !important;
+  border-radius: var(--nx-r-tile) !important;
 }
 
 /* Scrollbars: thin and colourless — they should not cut the surface up. */
@@ -1910,7 +2153,7 @@ body.nx-style-plain ::-webkit-scrollbar { width: 8px; height: 8px; }
 body.nx-style-plain ::-webkit-scrollbar-track { background: transparent; }
 body.nx-style-plain ::-webkit-scrollbar-thumb {
   background: color-mix(in srgb, var(--nx-fg) 18%, transparent);
-  border-radius: 4px;
+  border-radius: var(--nx-r-pill);   /* a scrollbar thumb genuinely is one */
 }
 body.nx-style-plain ::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--nx-fg) 30%, transparent);
@@ -2009,9 +2252,11 @@ body.nx-style-plain .cm-editor .cm-formatting { color: color-mix(in srgb, var(--
 }
 
 /* ── Tablet: cards yes, but with one device instead of three ───────────────── */
+/* The radius override is gone: the base is 10px now, which is what this block
+   was reaching for. What a tablet still needs is the tighter gap and no
+   shadow — one device of separation, not three. */
 .is-tablet {
   --nx-gap: 8px;
-  --nx-radius: 10px;
   --nx-chip-shadow: none;
 }
 .is-tablet .workspace-tab-header-container,
@@ -2031,7 +2276,6 @@ body.nx-style-plain .cm-editor .cm-formatting { color: color-mix(in srgb, var(--
 @media (min-width: 621px) and (max-width: 1100px) {
   body:not(.is-phone) {
     --nx-gap: 8px;
-    --nx-radius: 10px;
     --nx-chip-shadow: none;
   }
 }
