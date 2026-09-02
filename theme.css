@@ -40,7 +40,7 @@
  *  declares it on :root, the theme on .theme-dark/.theme-light — a higher
  *  specificity, so with Nexus active the theme's numbers win and under any
  *  other theme the plugin still has every token it uses. Editing one without
- *  the other is a defect, not a style opinion (.claude/token-spec.md).
+ *  the other is a defect, not a style opinion (docs/style-guide.md).
  *
  *  TWO radii, and that is all: --nx-radius for what CONTAINS, --nx-r-tile for
  *  what IS a control. A literal radius anywhere below is a defect; the only
