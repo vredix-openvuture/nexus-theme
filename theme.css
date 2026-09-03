@@ -387,6 +387,24 @@
   --tag-border-width:     var(--nx-bw);
 }
 
+/* Obsidian re-declares a handful of these for mobile at a HIGHER specificity
+   than the block above — `.is-mobile.theme-dark` (0,2,0) beats `.theme-dark`
+   (0,1,0) — so on a phone or tablet its values won and the theme's were never
+   used. The worst of them: `--interactive-normal` fell back to
+   `--background-modifier-border`, i.e. a BORDER colour used as a SURFACE. Since
+   this theme's border is a translucent accent wash, every surface Obsidian
+   paints from it (the sidebar's view switcher, its open list, native buttons)
+   came out as a 41%-opaque red pane you could read the page through. Restated
+   here at 0,3,0 so the palette wins on every device. */
+body.is-mobile.theme-dark,
+body.is-mobile.theme-light {
+  --interactive-normal: var(--nx-elevated);
+  --interactive-hover:  color-mix(in srgb, var(--nx-accent) 16%, var(--nx-elevated));
+  --background-modifier-form-field: var(--nx-elevated);
+  --modal-background: var(--nx-elevated);
+}
+
+
 
 /* ============================================================================
  * 5. DESK / LAYOUT  —  the desk behind the chips
@@ -607,6 +625,47 @@ body {
 
 .suggestion-item:hover,
 .suggestion-item.is-selected {
+  background-color: color-mix(in srgb, var(--nx-accent) 20%, transparent) !important;
+  color: var(--nx-fg-bright) !important;
+}
+
+/* ── The sidebar's view switcher on mobile ──────────────────────────────────
+   It is a menu in everything but its class name, so it gets the menu's look.
+   Obsidian paints the open list AND the chip that sits inside it from one
+   variable and gives the list no border — on a tablet not even a shadow, that
+   is `.is-phone` only. Three containers in one colour with no edge between
+   them, which is what made both drawers unreadable. Here: the list is the
+   panel, the chip inside it is a label, and the closed one is a control. */
+.workspace-drawer-tab-options-list {
+  background-color: var(--nx-elevated) !important;
+  border: var(--nx-hairline);
+  border-radius: var(--nx-radius) !important;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, .38) !important;
+}
+/* Inside the open list the "current view" row is a heading, not a second panel.
+   Obsidian already makes it inert (pointer-events: none); this stops it also
+   LOOKING like something to press. */
+.workspace-drawer-tab-options-list .workspace-drawer-tab-select .workspace-tab-header-inner {
+  background-color: transparent !important;
+  color: var(--nx-fg-muted, var(--text-muted));
+}
+/* The one OUTSIDE the list is the control you press. It gets the ELEVATED
+   surface, not --nx-chip-side: chip-side is built from the same 8% accent wash
+   as the drawer behind it, so a chip painted with it is invisible here. The
+   panel it opens is the same colour but carries a border and a drop shadow, so
+   the two still read as control-then-panel. (Direct child — the select inside
+   the list is the heading, styled above.) */
+.workspace-drawer-tab-options > .workspace-drawer-tab-select .workspace-tab-header-inner {
+  background-color: var(--nx-elevated) !important;
+  border: var(--nx-hairline);
+}
+/* One highlight for the row you are on, the same one every other menu here
+   draws, instead of Obsidian's two overlapping nav-item washes. */
+.workspace-drawer-tab-options-list .workspace-tab-header:not(.workspace-drawer-tab-select) .workspace-tab-header-inner {
+  background-color: transparent !important;
+  color: var(--nx-fg, var(--text-normal));
+}
+.workspace-drawer-tab-options-list .workspace-tab-header.is-active:not(.workspace-drawer-tab-select) .workspace-tab-header-inner {
   background-color: color-mix(in srgb, var(--nx-accent) 20%, transparent) !important;
   color: var(--nx-fg-bright) !important;
 }

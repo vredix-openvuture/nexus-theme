@@ -82,9 +82,19 @@ are the reason this was a bug:
 - The **states** of a surface belong to whoever styled the surface. Styling a
   menu panel and leaving `.menu-item.selected` to Obsidian is what produced a
   palette-coloured dropdown with a blue row in it.
+- Obsidian **re-declares some of them for mobile at a higher specificity**:
+  `.is-mobile.theme-dark` (0,2,0) beats section 4's `.theme-dark` (0,1,0), so a
+  variable set only there is simply not used on a phone or a tablet. The one
+  that hurt was `--interactive-normal`, which fell back to
+  `--background-modifier-border` — a *border* colour used as a *surface*, and
+  since ours is a translucent accent wash, every surface Obsidian painted from
+  it came out as a 41 %-opaque red pane you could read the page through. The
+  mobile block near the end of section 4 restates them at 0,3,0.
 
 When adding a rule that styles a native Obsidian element, check its states in
-the same change.
+the same change — and check whether Obsidian sets the same variable again for
+mobile. A quick way: extract `obsidian.asar` and grep `app.css` for the
+variable, which is how both of these were found rather than guessed.
 
 ## Geometry: two radii, and one file that owns them
 

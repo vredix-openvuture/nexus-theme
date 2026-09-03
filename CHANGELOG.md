@@ -2,7 +2,31 @@
 
 Grouped by what changed for you, not by commit. Newest first.
 
-## Unreleased
+## 0.8.2 — 2026-09-03
+
+### Fixed
+
+- **Both sidebars were unreadable on mobile.** The view switcher at the top of a
+  drawer, and the list it opens, are painted by Obsidian from
+  `--interactive-normal` — and on mobile Obsidian re-declares that variable at a
+  higher specificity than section 4 could reach, falling back to
+  `--background-modifier-border`. A *border* colour used as a *surface*: ours is
+  a translucent accent wash, so the panel came out 41 % opaque and red, with the
+  page legible straight through it and a chip of its own colour sitting inside
+  it. Three containers, one colour, no edge.
+
+  The mobile variables are restated at a specificity that wins, and the switcher
+  now gets the look every other menu here has: an opaque panel with a hairline
+  and a real shadow, the row inside it that names the current view drawn as a
+  heading instead of a second button, and one accent highlight on the row you
+  are on. Verified against Obsidian's own `app.css` in headless Chromium, before
+  and after.
+
+## 0.8.1 — 2026-09-02
+
+The token note points at this repo's own style guide. Nothing visual changed.
+
+## 0.8.0 — 2026-09-02
 
 ### Changed
 
