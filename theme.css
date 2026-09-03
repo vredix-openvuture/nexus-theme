@@ -642,12 +642,22 @@ body {
   border-radius: var(--nx-radius) !important;
   box-shadow: 0 6px 22px rgba(0, 0, 0, .38) !important;
 }
-/* Inside the open list the "current view" row is a heading, not a second panel.
-   Obsidian already makes it inert (pointer-events: none); this stops it also
-   LOOKING like something to press. */
-.workspace-drawer-tab-options-list .workspace-drawer-tab-select .workspace-tab-header-inner {
-  background-color: transparent !important;
-  color: var(--nx-fg-muted, var(--text-muted));
+/* The list is absolutely positioned at top:0, i.e. ON TOP of the control that
+   opened it, and Obsidian puts a dead COPY of that control inside it as a
+   spacer — so an open switcher showed the current view three times: the
+   control, the copy, and the row for it in the list. The copy goes, and the
+   panel starts below the control instead of under it. */
+.workspace-drawer-tab-options-list .workspace-drawer-tab-select { display: none !important; }
+.workspace-drawer-tab-options-list {
+  top: calc(var(--touch-size-l) + var(--size-4-1)) !important;
+  padding-top: var(--size-4-2) !important;
+}
+/* On a phone the list opens UPWARDS from the bottom, so it is its bottom edge
+   that has to clear the control, not its top. */
+.is-phone .workspace-drawer-tab-options-list {
+  top: auto !important;
+  bottom: calc(var(--touch-size-l) + var(--size-4-1)) !important;
+  padding-bottom: var(--size-4-2) !important;
 }
 /* The one OUTSIDE the list is the control you press. It gets the ELEVATED
    surface, not --nx-chip-side: chip-side is built from the same 8% accent wash

@@ -2,6 +2,18 @@
 
 Grouped by what changed for you, not by commit. Newest first.
 
+## 0.8.3 — 2026-09-04
+
+### Fixed
+
+- **The sidebar's view switcher showed the current view three times.** Obsidian
+  positions the open list at `top: 0` — on top of the control that opened it —
+  and puts a dead COPY of that control inside the list as a spacer. With the
+  panel given a background in 0.8.2 that became three stacked "Outline"s: the
+  control, its copy, and the row for it in the list. The copy is hidden and the
+  panel now starts *below* the control instead of over it, upwards from the
+  bottom on a phone where the list opens the other way.
+
 ## 0.8.2 — 2026-09-03
 
 ### Fixed
