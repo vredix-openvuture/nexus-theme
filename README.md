@@ -1,5 +1,7 @@
 # Nexus
 
+> **Work in progress.** This is a personal project under active development. Things change and break between releases; use it at your own risk.
+
 A card-based Obsidian theme. Crisp rather than cozy — clear edges, deliberate
 spacing, and a fixed default palette ("Ember & Prussian") built from five
 swatches: Aubergine, Rain Boots, Prussian, Madder and Claret. Six further
