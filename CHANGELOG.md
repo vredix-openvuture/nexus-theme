@@ -2,7 +2,7 @@
 
 Grouped by what changed for you, not by commit. Newest first.
 
-## Unreleased
+## 0.8.4 — 2026-10-11
 
 ### Changed
 
@@ -16,6 +16,8 @@ Grouped by what changed for you, not by commit. Newest first.
   light. Toggles are pills on every device.
 - **Smaller toggles in dialogs on a tablet.** 44 × 24 instead of Obsidian's
   phone-sized 52 × 30; the phone keeps Obsidian's size.
+
+Commits: v0.8.3...v0.8.4
 
 ## 0.8.3 — 2026-09-04
 
