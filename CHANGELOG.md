@@ -2,6 +2,21 @@
 
 Grouped by what changed for you, not by commit. Newest first.
 
+## Unreleased
+
+### Changed
+
+- **Settings cards follow the theme's radii and no longer sink below the page.**
+  They used Obsidian's own values: on a tablet a 30px card radius, 30px dialogs
+  and pill-shaped inputs and buttons (24–60px), on desktop a card background
+  darker than the page around it. Cards and dialogs now take the container
+  radius (10px, 6px in the plain style, square on a phone as everything else
+  there), inputs and buttons the tile radius (6px). The card surface is a step
+  from the dialog's toward the text colour — lighter in dark mode, darker in
+  light. Toggles are pills on every device.
+- **Smaller toggles in dialogs on a tablet.** 44 × 24 instead of Obsidian's
+  phone-sized 52 × 30; the phone keeps Obsidian's size.
+
 ## 0.8.3 — 2026-09-04
 
 ### Fixed

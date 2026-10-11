@@ -123,17 +123,27 @@ between them.
 | Token | For |
 |---|---|
 | `--nx-radius` | Anything that **contains** something: card, panel, modal, code block, callout, banner, image, popover. |
-| `--nx-r-tile` | Anything that **is** a control: button, input, list row, tab, chip, tag, swatch, toggle. |
+| `--nx-r-tile` | Anything that **is** a control: button, input, list row, tab, chip, tag, swatch. |
 
 Two more exist and are **shapes, not radii**: `--nx-r-circle` where the element
 genuinely is a circle (a colour dot), and `--nx-r-pill` only where the shape
-carries meaning — a segmented control, a status pill. An ordinary button is
+carries meaning — a segmented control, a status pill, a toggle. An ordinary button is
 never a pill.
 
 **A literal radius outside the token block is a defect.** The only permitted
 literal is `0`. The style variants (`nx-style-plain`, the narrow-window block,
 the tablet block, the Notion-like palette) override the two tokens and nothing
 else; that is the mechanism working, not an exception to it.
+
+Obsidian's own radius variables are mapped onto the two as well, so its
+surfaces obey the same rule: `--setting-items-radius`, `--modal-radius`,
+`--canvas-controls-radius` and the mobile `--touch-radius-xl` take
+`--nx-radius`, `--touch-radius-xxs…m` take `--nx-r-tile`. The touch sizes map
+only roughly onto control and container — Obsidian also rounds some containers
+with a small size — which is why those containers are named on their own.
+Without this a tablet showed 30px settings cards and dialogs and pill inputs
+beside the theme's 10px cards. A toggle is a pill (`--toggle-radius:
+var(--nx-r-pill)`): its shape is what says "switch".
 
 ### The numbers: 10px and 6px
 

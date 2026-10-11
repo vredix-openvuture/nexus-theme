@@ -303,6 +303,15 @@
   --background-primary-alt:     color-mix(in srgb, var(--nx-chip) 92%, black);
   --background-secondary:      var(--nx-chip-side);
   --background-secondary-alt:   var(--nx-elevated);
+  /* Settings rows are cards: the container radius, and a surface a step from
+     the dialog's own (--nx-elevated) toward the text colour — lighter in dark,
+     darker in light. Obsidian's default is --background-primary-alt, which this
+     theme sinks toward black, so on desktop every settings card sat darker
+     than the page around it. */
+  --setting-items-radius:     var(--nx-radius);
+  --setting-items-background: color-mix(in srgb, var(--nx-elevated) 95%, var(--nx-fg));
+  /* A switch is a pill by shape, on every device (Obsidian: 18 / 24 / 26px). */
+  --toggle-radius: var(--nx-r-pill);
   --background-modifier-border: var(--nx-border);
   --background-modifier-border-hover:
       color-mix(in srgb, var(--nx-accent) 45%, var(--nx-border));
@@ -395,13 +404,41 @@
    this theme's border is a translucent accent wash, every surface Obsidian
    paints from it (the sidebar's view switcher, its open list, native buttons)
    came out as a 41%-opaque red pane you could read the page through. Restated
-   here at 0,3,0 so the palette wins on every device. */
+   here at 0,2,1 so the palette wins on every device. */
 body.is-mobile.theme-dark,
 body.is-mobile.theme-light {
   --interactive-normal: var(--nx-elevated);
   --interactive-hover:  color-mix(in srgb, var(--nx-accent) 16%, var(--nx-elevated));
   --background-modifier-form-field: var(--nx-elevated);
   --modal-background: var(--nx-elevated);
+  /* Obsidian rounds everything on a touch device to 24–60px — a settings card
+     at 30px, an input or button as a pill. The theme's two radii apply on
+     every device. The --touch-radius-* sizes map only roughly onto "control"
+     and "container", so the containers Obsidian rounds with a small size
+     (modal, canvas controls, settings cards) are named on their own. Restated
+     from the block above because Obsidian's `.is-mobile.theme-dark` outranks
+     it. */
+  --setting-items-radius:     var(--nx-radius);
+  --setting-items-background: color-mix(in srgb, var(--nx-elevated) 95%, var(--nx-fg));
+  --modal-radius:             var(--nx-radius);
+  --canvas-controls-radius:   var(--nx-radius);
+  --touch-radius-xxs: var(--nx-r-tile);
+  --touch-radius-xs:  var(--nx-r-tile);
+  --touch-radius-s:   var(--nx-r-tile);
+  --touch-radius-m:   var(--nx-r-tile);
+  --touch-radius-xl:  var(--nx-radius);
+}
+/* Obsidian sets the phone's modal radius on the container itself, so the
+   value inherited from body never reaches it. */
+.is-phone .modal-container { --modal-radius: var(--nx-radius); }
+/* A tablet is used with a pen as much as a finger: Obsidian's phone-sized
+   52 x 30 toggle is twice the area of the desktop one. 44 x 24 is still an
+   easy target. The phone keeps Obsidian's size. */
+body.is-tablet.theme-dark,
+body.is-tablet.theme-light {
+  --toggle-width: 44px;
+  --toggle-thumb-height: 20px;
+  --toggle-thumb-width: 20px;
 }
 
 
